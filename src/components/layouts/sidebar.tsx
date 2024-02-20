@@ -2,8 +2,10 @@
 
 import * as React from 'react';
 import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import AppBar from '@mui/material/AppBar';
+import Typography from '@mui/material/Typography';
 import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
@@ -12,15 +14,18 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
-import MenuOpenSharpIcon from '@mui/icons-material/MenuOpenSharp';
-import { IconButton } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import Badge from '@mui/material/Badge';
 
-export default function TemporaryDrawer() {
+import Link from 'next/link';
+
+interface TemporaryDrawerProps {
+  residence: string;
+}
+
+export default function TemporaryDrawer({ residence }: TemporaryDrawerProps) {
   const [state, setState] = React.useState({
-    top: false,
     left: false,
-    bottom: false,
-    right: false,
   });
 
   const toggleDrawer =
@@ -37,6 +42,8 @@ export default function TemporaryDrawer() {
         setState({ ...state, left: open });
       };
 
+  const navItems = ['Home', 'About', 'Contact'];
+
   const list = () => (
     <Box
       sx={{ width: 250 }}
@@ -46,17 +53,19 @@ export default function TemporaryDrawer() {
     >
       <List>
         {['General', 'Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
+          <Link key={text} href={`/${residence}/${text.toLowerCase()}`}>
+            <ListItem disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  {index % 2 === 0 ?  <InboxIcon /> : <Badge badgeContent={4} color="primary"><MailIcon /></Badge>}
+                </ListItemIcon>
+                <ListItemText primary={text} />
+              </ListItemButton>
+            </ListItem>
+          </Link>
         ))}
       </List>
-      <Divider />
+      <Divider />F
       <List>
         {['All mail', 'Trash', 'Spam'].map((text, index) => (
           <ListItem key={text} disablePadding>
@@ -72,12 +81,34 @@ export default function TemporaryDrawer() {
     </Box>
   );
 
+  const pathname: string = window.location.pathname;
+  const pathParts: string[] = pathname.split('/');
+
   return (
     <div>
       <React.Fragment>
-        <IconButton>
-          <MenuOpenSharpIcon onClick={toggleDrawer(true)} />
-        </IconButton>
+        <AppBar component="nav">
+          <Toolbar>
+            <IconButton onClick={toggleDrawer(true)} color="inherit"
+              aria-label="open drawer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" strokeLinecap="round" strokeMiterlimit={10} strokeWidth={48} d="M88 152h336M88 256h336M88 360h336"></path></svg>
+            </IconButton>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
+            >
+              {pathParts[1].toUpperCase()}
+            </Typography>
+            {/* <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+              {navItems.map((item) => (
+                <Button key={item} sx={{ color: '#fff' }}>
+                  {item}
+                </Button>
+              ))}
+            </Box> */}
+          </Toolbar>
+        </AppBar>
         <Drawer
           anchor={'left'}
           open={state['left']}
