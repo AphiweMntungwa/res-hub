@@ -5,38 +5,36 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
+import ListSubheader from '@mui/material/ListSubheader';
 import Avatar from '@mui/material/Avatar';
-import ImageIcon from '@mui/icons-material/Image';
-import WorkIcon from '@mui/icons-material/Work';
-import BeachAccessIcon from '@mui/icons-material/BeachAccess';
+import PersonIcon from '@mui/icons-material/Person';
+import Grid from '@mui/material/Grid';
 
 export default function ChatList() {
-  return (
-    <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
-      <ListItem>
-        <ListItemAvatar>
-          <Avatar>
-            <ImageIcon />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText primary="Photos" secondary="Jan 9, 2014" />
-      </ListItem>
-      <ListItem>
-        <ListItemAvatar>
-          <Avatar>
-            <WorkIcon />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText primary="Work" secondary="Jan 7, 2014" />
-      </ListItem>
-      <ListItem>
-        <ListItemAvatar>
-          <Avatar>
-            <BeachAccessIcon />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText primary="Vacation" secondary="July 20, 2014" />
-      </ListItem>
-    </List>
-  );
+    return (
+        <React.Fragment>
+            <Grid container>
+                <Grid item xs={12} display="flex" justifyContent="center">
+                    <List subheader={
+                        <ListSubheader component="div" id="nested-list-subheader">
+                            User Chats
+                        </ListSubheader>
+                    } sx={{ width: '100%', maxWidth: 560, bgcolor: 'background.paper' }}>
+                        {['User 1', 'User 2', 'User 3', 'User 4', 'User 5'].map(user => {
+                            return (
+                                <ListItem key={user}>
+                                    <ListItemAvatar>
+                                        <Avatar>
+                                            <PersonIcon />
+                                        </Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText primary={user} secondary="Jan 9, 2014" />
+                                </ListItem>
+                            )
+                        })}
+                    </List>
+                </Grid>
+            </Grid>
+        </React.Fragment>
+    )
 }

@@ -52,7 +52,7 @@ export default function TemporaryDrawer({ residence }: TemporaryDrawerProps) {
       onKeyDown={toggleDrawer(false)}
     >
       <List>
-        {['General', 'Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
+        {['General', 'Inbox', 'Buses', 'Events', 'Residence'].map((text, index) => (
           <Link key={text} href={`/${residence}/${text.toLowerCase()}`}>
             <ListItem disablePadding>
               <ListItemButton>
@@ -65,9 +65,9 @@ export default function TemporaryDrawer({ residence }: TemporaryDrawerProps) {
           </Link>
         ))}
       </List>
-      <Divider />F
+      <Divider />
       <List>
-        {['All mail', 'Trash', 'Spam'].map((text, index) => (
+        {['Businesses', 'Roles', 'Settings'].map((text, index) => (
           <ListItem key={text} disablePadding>
             <ListItemButton>
               <ListItemIcon>
