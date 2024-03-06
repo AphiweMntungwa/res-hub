@@ -9,6 +9,7 @@ import ListSubheader from '@mui/material/ListSubheader';
 import Avatar from '@mui/material/Avatar';
 import PersonIcon from '@mui/icons-material/Person';
 import Grid from '@mui/material/Grid';
+import Link from 'next/link';
 
 export default function ChatList() {
     return (
@@ -22,14 +23,17 @@ export default function ChatList() {
                     } sx={{ width: '100%', maxWidth: 560, bgcolor: 'background.paper' }}>
                         {['User 1', 'User 2', 'User 3', 'User 4', 'User 5'].map(user => {
                             return (
-                                <ListItem key={user}>
-                                    <ListItemAvatar>
-                                        <Avatar>
-                                            <PersonIcon />
-                                        </Avatar>
-                                    </ListItemAvatar>
-                                    <ListItemText primary={user} secondary="Jan 9, 2014" />
-                                </ListItem>
+                                <Link href={`inbox/${user}`} key={user}>
+                                    <ListItem >
+                                        <ListItemAvatar>
+                                            <Avatar>
+                                                <PersonIcon />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText primary={user} secondary="Jan 9, 2014" />
+                                    </ListItem>
+                                </Link>
+
                             )
                         })}
                     </List>

@@ -15,6 +15,7 @@
     "@mui/icons-material": "^5.15.7",
     "@mui/material": "^5.15.5",
     "@mui/material-nextjs": "^5.15.5",
+    "axios": "^1.6.7",
     "canvas": "^2.11.2",
     "konva": "^9.3.2",
     "next": "14.0.4",

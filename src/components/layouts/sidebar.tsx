@@ -96,7 +96,7 @@ export default function TemporaryDrawer({ residence }: TemporaryDrawerProps) {
             <Typography
               variant="h6"
               component="div"
-              sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
+              sx={{ flexGrow: 1, display: { sm: 'block' } }}
             >
               {pathParts[1].toUpperCase()}
             </Typography>
