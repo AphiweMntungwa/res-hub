@@ -8,9 +8,9 @@ interface TabGroupProps {
 }
 
 const TabGroup: React.FC<TabGroupProps> = (props) => {
-    const [value, setValue] = React.useState('one');
+    const [value, setValue] = React.useState(0);
 
-    const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
 
@@ -23,10 +23,10 @@ const TabGroup: React.FC<TabGroupProps> = (props) => {
                 scrollButtons="auto"
                 aria-label="scrollable auto tabs example"
             >
-                <Tab value="posts" label="Posts" />
-                <Tab value="buses" label="Buses" />
-                <Tab value="l&f" label="Lost & Found" />
-                <Tab value="events" label="Events" />
+                <Tab label="Posts" />
+                <Tab label="Buses" />
+                <Tab label="Lost & Found" />
+                <Tab  label="Events" />
             </Tabs>
         </Box>
     );

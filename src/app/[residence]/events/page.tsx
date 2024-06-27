@@ -1,23 +1,53 @@
 import type { Metadata } from 'next';
 import React from 'react';
- 
+import axios from 'axios';
+import Events from '@/components/pages/p-events/Events';
+
 
 export const metadata: Metadata = {
     title: 'Events',
     description: "Res events platform for the specific residence",
 }
 
-
-interface EventsProps {
-    // You can define any props if needed
+interface Event {
+    id: number;
+    eventName: string;
+    dateOfEvent: string;
+    type: string;
 }
 
-const Events: React.FC<EventsProps> = (props) => {
+interface EventProps {
+    events: Event[];
+}
+
+// Create an axios instance with SSL configuration
+const axiosInstance = axios.create({
+    baseURL: 'https://localhost:7217/api',
+    // `httpsAgent` can be used to handle self-signed certificates
+    httpsAgent: new (require('https').Agent)({
+        rejectUnauthorized: false
+    })
+});
+
+
+async function fetchEvents(): Promise<Event[]> {
+    try {
+        const response = await axiosInstance.get('/Events');
+        console.log(response)
+        return response.data.$values;
+    } catch (error) {
+        return []
+    }
+}
+
+const EventPage = async () => {
+    const events = await fetchEvents();
+
     return (
-        <section className="flex min-h-screen flex-col items-center justify-between pt-20 px-8">
-          <h3>events</h3>  
+        <section className="flex min-h-screen flex-column items-center flex-col pt-20 px-8">
+            <Events events={events} />
         </section>
     );
 };
 
-export default Events;
+export default EventPage;

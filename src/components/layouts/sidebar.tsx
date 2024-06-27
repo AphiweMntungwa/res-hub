@@ -42,7 +42,6 @@ export default function TemporaryDrawer({ residence }: TemporaryDrawerProps) {
         setState({ ...state, left: open });
       };
 
-  const navItems = ['Home', 'About', 'Contact'];
 
   const list = () => (
     <Box
@@ -52,7 +51,7 @@ export default function TemporaryDrawer({ residence }: TemporaryDrawerProps) {
       onKeyDown={toggleDrawer(false)}
     >
       <List>
-        {['General', 'Inbox', 'Buses', 'Events', 'Residence'].map((text, index) => (
+        {['General', 'Inbox', 'Buses', 'Events', 'Sports'].map((text, index) => (
           <Link key={text} href={`/${residence}/${text.toLowerCase()}`}>
             <ListItem disablePadding>
               <ListItemButton>

@@ -18,7 +18,6 @@ const Buses: React.FC<BusesProps> = (props) => {
                         <Typography variant='h6'>
                             Bus admin is user 3
                         </Typography>
-
                     </Alert>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>

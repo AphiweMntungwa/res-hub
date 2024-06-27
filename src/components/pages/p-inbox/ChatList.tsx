@@ -33,7 +33,6 @@ export default function ChatList() {
                                         <ListItemText primary={user} secondary="Jan 9, 2014" />
                                     </ListItem>
                                 </Link>
-
                             )
                         })}
                     </List>
