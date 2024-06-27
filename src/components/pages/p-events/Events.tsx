@@ -1,5 +1,5 @@
 "use client"
-import React from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import Alert from '@mui/material/Alert';
 import CheckIcon from '@mui/icons-material/Check';
 import Grid from '@mui/material/Grid';
@@ -13,7 +13,8 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import ImageIcon from '@mui/icons-material/Image';
-import AddTaskOutlinedIcon from '@mui/icons-material/AddTaskOutlined'; import BeachAccessIcon from '@mui/icons-material/BeachAccess';
+import AddTaskOutlinedIcon from '@mui/icons-material/AddTaskOutlined'; 
+import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import { IconButton } from '@mui/material';
 
 interface Event {
@@ -40,8 +41,19 @@ function convertToDate(dateString: string) {
     return new Date(dateString).getFullYear();
 }
 
+const AlertDialogSlideAddEvent = lazy(() => import('@/components/pages/p-events/Dialogs').then(module => ({ default: module.AlertDialogSlideAddEvent })));;
+
 const Events: React.FC<EventProps> = (props) => {
-    console.log(props.events)
+    const [openDialog, setOpenDialog] = useState(false);
+
+    const handleClickOpen = () => {
+        setOpenDialog(true);
+    };
+
+    const handleClose = () => {
+        setOpenDialog(false);
+    };
+
 
     return (
         <React.Fragment>
@@ -51,7 +63,7 @@ const Events: React.FC<EventProps> = (props) => {
                         primary={"e.eventName"}
                         secondary={'convertToDate("e.dateOfEvent")'}
                     />
-                    <IconButton>
+                    <IconButton onClick={handleClickOpen}>
                         <AddTaskOutlinedIcon />
                     </IconButton>
                 </ListItem>
@@ -73,6 +85,11 @@ const Events: React.FC<EventProps> = (props) => {
                     </ListItem>
                 ))}
             </List>
+            <Suspense fallback={<div>Loading...</div>}>
+                {openDialog && (
+                    <AlertDialogSlideAddEvent open={openDialog} handleClose={handleClose} />
+                )}
+            </Suspense>
         </React.Fragment>
     );
 };
