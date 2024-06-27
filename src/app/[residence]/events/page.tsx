@@ -16,14 +16,9 @@ interface Event {
     type: string;
 }
 
-interface EventProps {
-    events: Event[];
-}
-
 // Create an axios instance with SSL configuration
 const axiosInstance = axios.create({
     baseURL: 'https://localhost:7217/api',
-    // `httpsAgent` can be used to handle self-signed certificates
     httpsAgent: new (require('https').Agent)({
         rejectUnauthorized: false
     })
@@ -33,7 +28,6 @@ const axiosInstance = axios.create({
 async function fetchEvents(): Promise<Event[]> {
     try {
         const response = await axiosInstance.get('/Events');
-        console.log(response)
         return response.data.$values;
     } catch (error) {
         return []
