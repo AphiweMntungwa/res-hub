@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import React from 'react';
-import axios from 'axios';
 import Events from '@/components/pages/p-events/Events';
+import axiosInstance from '@/lib/axiosInstance';
 
 
 export const metadata: Metadata = {
@@ -15,14 +15,6 @@ interface Event {
     dateOfEvent: string;
     type: string;
 }
-
-// Create an axios instance with SSL configuration
-const axiosInstance = axios.create({
-    baseURL: 'https://localhost:7217/api',
-    httpsAgent: new (require('https').Agent)({
-        rejectUnauthorized: false
-    })
-});
 
 
 async function fetchEvents(): Promise<Event[]> {

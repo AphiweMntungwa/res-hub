@@ -10,11 +10,20 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField'
 import Autocomplete from '@mui/material/Autocomplete';
 import { TransitionProps } from '@mui/material/transitions';
+import { Dayjs } from 'dayjs';
+import axiosInstance from '@/lib/axiosInstance';
 
 interface Props {
     open: boolean;
     handleClose: () => void;
 }
+
+interface Event {
+    eventName: string;
+    dateOfEvent: any;
+    type: string;
+}
+
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -25,7 +34,7 @@ const Transition = React.forwardRef(function Transition(
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const DatePicker = React.lazy(() => import('@/components/pages/p-events/DatePicker'));
+const DatePicker: any = React.lazy(() => import('@/components/pages/p-events/DatePicker'));
 
 const typeOptions = [
     { label: 'Sports', id: 0 },
@@ -36,7 +45,20 @@ const typeOptions = [
 
 export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose }) => {
     const [name, setName] = React.useState('');
+    const [eventTypeVal, setEventTypeValue] = React.useState<any | null>(typeOptions[0]);
+    const [dateOfEventValue, setDateOfEventValue] = React.useState<Dayjs | null>(null);
 
+
+    const handleSubmitAddEvent = async (event: Event) => {
+        try {
+            const response = await axiosInstance.post('/Events', event);
+            console.log(response);
+            handleClose();
+        } catch (error) {
+            console.log(error)
+            return [];
+        }
+    }
 
     return (
         <React.Fragment>
@@ -60,6 +82,10 @@ export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose })
                     <Autocomplete
                         disablePortal
                         id="combo-box-demo"
+                        value={eventTypeVal}
+                        onChange={(event: any, newValue: string | null) => {
+                            setEventTypeValue(newValue);
+                        }}
                         options={typeOptions}
                         sx={{ width: 300 }}
                         renderInput={(params) => <TextField
@@ -77,7 +103,7 @@ export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose })
                         }}
                     />
                     <React.Suspense fallback={<div>Loading...</div>}>
-                        <DatePicker />
+                        <DatePicker dateOfEventValue={dateOfEventValue} setDateOfEventValue={setDateOfEventValue} />
                     </React.Suspense>
                 </Box>
 
@@ -88,7 +114,16 @@ export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose })
                     </DialogContentText>
                 </DialogContent> */}
                 <DialogActions>
-                    <Button onClick={handleClose}>Submit</Button>
+                    <Button onClick={() => {
+                        const newEvent: Event = {
+                            eventName: name,
+                            dateOfEvent: dateOfEventValue,
+                            type: eventTypeVal.id,
+                        };
+                        handleSubmitAddEvent(newEvent);
+                    }
+                    }>
+                        Submit</Button>
                 </DialogActions>
             </Dialog>
         </React.Fragment>
