@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic'
 
-const Canvas = dynamic(() => import('../canvas'), { ssr: false })
+const Canvas = dynamic(() => import('../../components/morris/canvas'), { ssr: false })
 
 
 export default function Dashboard() {
