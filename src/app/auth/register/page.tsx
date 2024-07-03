@@ -1,61 +1,88 @@
 'use client'
+import React from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as Yup from 'yup';
+import { TextField, Button } from '@mui/material';
 
-import React, { useState, FormEvent } from 'react';
-import axiosInstance from '@/lib/axiosInstance';
+type Inputs = {
+  studentNumber: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+};
 
-interface RegisterStudentProps {}
+const validationSchema = Yup.object().shape({
+  studentNumber: Yup.string()
+  .matches(/^\d{8}$/, 'Student Number must be exactly 8 digits')
+  .required('Student Number is required'),
+  lastName: Yup.string().required('Last Name is required'),
+  email: Yup.string().email('Invalid email address').required('Email is required'),
+  password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+});
 
-const RegisterStudent: React.FC<RegisterStudentProps> = () => {
-  const [studentNumber, setStudentNumber] = useState<string>('');
-  const [firstName, setFirstName] = useState<string>('');
-  const [lastName, setLastName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+const RegisterStudent = () => {
+  const { register, handleSubmit, formState: { errors } } = useForm<Inputs>({
+    resolver: yupResolver(validationSchema)
+  });
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    const userName = `${studentNumber}@dut4life.ac.za`;
-
-    const newStudentResident = {
-      studentNumber,
-      firstName,
-      lastName,
-      userName,
-      email,
-      password,
-    };
-
-    try {
-      const response = await axiosInstance.post<any>('/StudentResidents', newStudentResident);
-      console.log('Student registered successfully', response.data);
-    } catch (error) {
-      console.error('There was an error registering the student!', error);
-    }
+  const onSubmit: SubmitHandler<Inputs> = data => {
+    console.log(data);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div>
-        <label>Student Number:</label>
-        <input type="text" value={studentNumber} onChange={(e) => setStudentNumber(e.target.value)} required />
+        <TextField
+          label="Student Number"
+          margin="normal"
+          {...register("studentNumber")}
+          error={!!errors.studentNumber}
+          helperText={errors.studentNumber?.message}
+        />
       </div>
       <div>
-        <label>First Name:</label>
-        <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+        <TextField
+          label="First Name"
+          margin="normal"
+          {...register("firstName")}
+          error={!!errors.firstName}
+          helperText={errors.firstName?.message}
+        />
       </div>
       <div>
-        <label>Last Name:</label>
-        <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+        <TextField
+          label="Last Name"
+          margin="normal"
+          {...register("lastName")}
+          error={!!errors.lastName}
+          helperText={errors.lastName?.message}
+        />
       </div>
       <div>
-        <label>Email:</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <TextField
+          label="Email"
+          type="email"
+          margin="normal"
+          {...register("email")}
+          error={!!errors.email}
+          helperText={errors.email?.message}
+        />
       </div>
       <div>
-        <label>Password:</label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <TextField
+          label="Password"
+          type="password"
+          margin="normal"
+          {...register("password")}
+          error={!!errors.password}
+          helperText={errors.password?.message}
+        />
       </div>
-      <button type="submit">Register</button>
+      <Button type="submit" variant="contained" color="primary">
+        Register
+      </Button>
     </form>
   );
 };
