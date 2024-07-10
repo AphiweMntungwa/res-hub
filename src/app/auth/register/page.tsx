@@ -38,7 +38,6 @@ const RegisterStudent = () => {
     const [activeStep, setActiveStep] = React.useState(0);
     const [resName, setResName] = React.useState<any | null>(residences[0]);
     const [roomNumber, setRoomNumber] = React.useState<number | null>(1);
-    const inputRef = React.useRef<HTMLInputElement | null>(null);
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -94,6 +93,7 @@ const RegisterStudent = () => {
                     onChange={(event, newValue) => {
                       setResName(newValue);
                     }}
+                    isOptionEqualToValue={(option, value) => option.title === value.title}
                     renderInput={(params) => <TextField {...params} label="Residences With categories" />}
                 />
                 <Input
@@ -104,7 +104,6 @@ const RegisterStudent = () => {
                     onChange={(event) => setRoomNumber(parseInt(event.target.value))}
                     slotProps={{
                         input: {
-                            ref: inputRef,
                             min: 1,
                             max: 4000,
                             step: 1,
