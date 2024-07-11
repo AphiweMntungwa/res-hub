@@ -80,7 +80,7 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
 
     const onSubmit: SubmitHandler<Inputs> = data => {
         console.log({ ...data, resName: res.name, resId: res.resId, roomNumber });
-        router.push(`/residence?${res.resId}`);
+        router.push(`/residence?resId=${res.resId}`);
     }
 
     return (

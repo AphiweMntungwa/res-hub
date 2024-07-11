@@ -22,7 +22,8 @@ import { useSearchParams } from 'next/navigation';
 import axiosInstance from "@/lib/axiosInstance";
 
 
-export default async function TemporaryDrawer() {
+export default function TemporaryDrawer() {
+  const [resName, setResName] = React.useState<Promise<string>>();
   const searchParams = useSearchParams();
   const resId = searchParams.get('resId');
 
@@ -49,12 +50,14 @@ export default async function TemporaryDrawer() {
       const response = await axiosInstance.get(`/Residence/name/${resId}`);
       return response.data;
     } catch (error) {
-      return 'No Residence'
+      return 'Loading...'
     }
   }
 
-
-  const residenceName = await fetchResidenceName();
+  React.useEffect(() => {
+    const residenceName = fetchResidenceName();
+    setResName(residenceName)
+  }, [])
 
 
   const list = () => (
@@ -66,7 +69,7 @@ export default async function TemporaryDrawer() {
     >
       <List>
         {['General', 'Inbox', 'Buses', 'Events', 'Sports'].map((text, index) => (
-          <Link key={text} href={`/${residenceName}/${text.toLowerCase()}`}>
+          <Link key={text} href={`/residence/${text.toLowerCase()}`}>
             <ListItem disablePadding>
               <ListItemButton>
                 <ListItemIcon>
@@ -94,9 +97,6 @@ export default async function TemporaryDrawer() {
     </Box>
   );
 
-  const pathname: string = window.location.pathname;
-  const pathParts: string[] = pathname.split('/');
-
   return (
     <div>
       <React.Fragment>
@@ -111,7 +111,7 @@ export default async function TemporaryDrawer() {
               component="div"
               sx={{ flexGrow: 1, display: { sm: 'block' } }}
             >
-              {pathParts[1].toUpperCase()}
+             <span> {resName}</span>
             </Typography>
             {/* <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
               {navItems.map((item) => (
