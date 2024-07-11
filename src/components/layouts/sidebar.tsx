@@ -18,12 +18,14 @@ import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import axiosInstance from "@/lib/axiosInstance";
 
-interface TemporaryDrawerProps {
-  residence: string;
-}
 
-export default function TemporaryDrawer({ residence }: TemporaryDrawerProps) {
+export default async function TemporaryDrawer() {
+  const searchParams = useSearchParams();
+  const resId = searchParams.get('resId');
+
   const [state, setState] = React.useState({
     left: false,
   });
@@ -42,6 +44,18 @@ export default function TemporaryDrawer({ residence }: TemporaryDrawerProps) {
         setState({ ...state, left: open });
       };
 
+  async function fetchResidenceName(): Promise<string> {
+    try {
+      const response = await axiosInstance.get(`/Residence/name/${resId}`);
+      return response.data;
+    } catch (error) {
+      return 'No Residence'
+    }
+  }
+
+
+  const residenceName = await fetchResidenceName();
+
 
   const list = () => (
     <Box
@@ -52,11 +66,11 @@ export default function TemporaryDrawer({ residence }: TemporaryDrawerProps) {
     >
       <List>
         {['General', 'Inbox', 'Buses', 'Events', 'Sports'].map((text, index) => (
-          <Link key={text} href={`/${residence}/${text.toLowerCase()}`}>
+          <Link key={text} href={`/${residenceName}/${text.toLowerCase()}`}>
             <ListItem disablePadding>
               <ListItemButton>
                 <ListItemIcon>
-                  {index % 2 === 0 ?  <InboxIcon /> : <Badge badgeContent={4} color="primary"><MailIcon /></Badge>}
+                  {index % 2 === 0 ? <InboxIcon /> : <Badge badgeContent={4} color="primary"><MailIcon /></Badge>}
                 </ListItemIcon>
                 <ListItemText primary={text} />
               </ListItemButton>
