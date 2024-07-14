@@ -5,6 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { TextField, Autocomplete, Button, Typography, Stepper, StepLabel, Step, Box } from '@mui/material';
 import Input from '@mui/joy/Input';
+import axiosInstance from '@/lib/axiosInstance';
 import { useRouter } from 'next/navigation';
 
 type Inputs = {
@@ -45,7 +46,11 @@ const validationSchema = Yup.object().shape({
         }),
     password: Yup.string()
         .required('Password is required')
-        .min(6, 'Password must be at least 6 characters'),
+        .min(6, 'Password must be at least 6 characters')
+        .matches(/[A-Z]/, 'Passwords must have at least one uppercase letter (A-Z).')
+        .matches(/[a-z]/, 'Passwords must have at least one lowercase letter (a-z).')
+        .matches(/[0-9]/, 'Passwords must have at least one digit (0-9).')
+        .matches(/[^a-zA-Z0-9]/, 'Passwords must have at least one non-alphanumeric character.'),
     confirmPassword: Yup.string().required('password confirmation is required')
         .oneOf([Yup.ref('password')], 'Passwords must match')
 });
@@ -56,7 +61,7 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
     const router = useRouter();
     const [activeStep, setActiveStep] = React.useState(0);
     const [res, setRes] = React.useState<any | null>(residences[0]);
-    const [roomNumber, setRoomNumber] = React.useState<number | null>(1);
+    const [roomNumber, setRoomNumber] = React.useState<string>("1");
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -78,9 +83,17 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
         };
     });
 
-    const onSubmit: SubmitHandler<Inputs> = data => {
-        console.log({ ...data, resName: res.name, resId: res.resId, roomNumber });
-        router.push(`/residence?resId=${res.resId}`);
+    const onSubmit: SubmitHandler<Inputs> = async (data) => {
+        console.log({ ...data, resName: res.name, residenceId: res.resId, roomNumber, userName: data.email });
+
+        try {
+            const response = await axiosInstance.post('/StudentResident/register', { ...data, resName: res.name, residenceId: res.resId, roomNumber, userName: data.email });
+            console.log(response);
+            router.push(`/residence?resId=${res.resId}`);
+        } catch (error) {
+            console.log(error)
+            return [];
+        }
     }
 
     return (
@@ -120,8 +133,8 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                     className='mt-5'
                     sx={{ height: 20 }}
                     type="number"
-                    value={roomNumber?.toString()}
-                    onChange={(event) => setRoomNumber(parseInt(event.target.value))}
+                    value={roomNumber}
+                    onChange={(event) => setRoomNumber(event.target.value)}
                     slotProps={{
                         input: {
                             min: 1,
