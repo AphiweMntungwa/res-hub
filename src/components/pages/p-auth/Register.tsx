@@ -89,7 +89,7 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
         try {
             const response = await axiosInstance.post('/StudentResident/register', { ...data, resName: res.name, residenceId: res.resId, roomNumber, userName: data.email });
             console.log(response);
-            router.push(`/residence?resId=${res.resId}`);
+            // router.push(`/residence?resId=${res.resId}`);
         } catch (error) {
             console.log(error)
             return [];

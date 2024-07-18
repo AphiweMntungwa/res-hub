@@ -3,7 +3,7 @@ import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { TextField, Checkbox, Button, Typography, FormControlLabel, Link } from '@mui/material';
+import { TextField, Checkbox, Button, Typography, FormControlLabel, Alert, Link } from '@mui/material';
 import Input from '@mui/joy/Input';
 import axiosInstance from '@/lib/axiosInstance';
 import { useRouter } from 'next/navigation';
@@ -25,6 +25,7 @@ const validationSchema = Yup.object().shape({
 
 
 const Login = () => {
+    const [errorMessage, setErrorMessage] = React.useState("");
     const router = useRouter();
 
     const { register, handleSubmit, formState: { errors } } = useForm<Inputs>({
@@ -36,9 +37,8 @@ const Login = () => {
         try {
             const response = await axiosInstance.post('StudentResident/login', data);
             console.log(response);
-            // router.push(`/residence?resId=${response}`);
         } catch (error: any) {
-            console.error('Login failed:', error.response.data);
+            setErrorMessage(error?.response?.data);
         }
     }
 
@@ -81,6 +81,7 @@ const Login = () => {
                     Sign In
                 </Button>
             </form>
+            {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
             <Typography variant="body2" component="p" style={{ marginTop: '10px' }}>
                 Don&apos;t have an account?
                 <Link component={NextLink} href="/auth/register">
