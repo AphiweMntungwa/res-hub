@@ -8,6 +8,7 @@ import Input from '@mui/joy/Input';
 import axiosInstance from '@/lib/axiosInstance';
 import { useRouter } from 'next/navigation';
 import NextLink from 'next/link'; // Import NextLink
+import Cookies from 'js-cookie';
 
 type Inputs = {
     email: string;
@@ -37,6 +38,8 @@ const Login = () => {
         try {
             const response = await axiosInstance.post('StudentResident/login', data);
             console.log(response);
+            const { token } = response.data;
+            Cookies.set('token', token, { expires: 1 }); // Expires in 1 day
         } catch (error: any) {
             setErrorMessage(error?.response?.data);
         }

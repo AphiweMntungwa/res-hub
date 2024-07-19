@@ -6,7 +6,9 @@ import * as Yup from 'yup';
 import { TextField, Autocomplete, Button, Typography, Stepper, StepLabel, Step, Box } from '@mui/material';
 import Input from '@mui/joy/Input';
 import axiosInstance from '@/lib/axiosInstance';
+import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
+import EmailConfirm from './EmailConfirmation';
 
 type Inputs = {
     studentNumber: string;
@@ -55,7 +57,7 @@ const validationSchema = Yup.object().shape({
         .oneOf([Yup.ref('password')], 'Passwords must match')
 });
 
-const steps = ['Add Residence Information', 'Create Account'];
+const steps = ['Add Residence Information', 'Create Account', 'Email Confirmation'];
 
 const Register: React.FC<ResidenceProps> = ({ residences }) => {
     const router = useRouter();
@@ -89,6 +91,9 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
         try {
             const response = await axiosInstance.post('/StudentResident/register', { ...data, resName: res.name, residenceId: res.resId, roomNumber, userName: data.email });
             console.log(response);
+            const { token } = response.data;
+            // Save the token in cookies
+            Cookies.set('token', token, { expires: 1 }); // Expires in 1 day
             // router.push(`/residence?resId=${res.resId}`);
         } catch (error) {
             console.log(error)
@@ -115,6 +120,7 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                     );
                 })}
             </Stepper>
+
             {activeStep === 0 ? (<Box className="pt-5">
                 <Autocomplete
                     id="grouped-demo"
@@ -143,7 +149,7 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                         },
                     }}
                 />
-            </Box>) :
+            </Box>) : activeStep === 1 ?
                 (<form style={{ minWidth: "50%" }} onSubmit={handleSubmit(onSubmit)}>
                     <div>
                         <TextField
@@ -211,7 +217,8 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                     <Button type="submit" variant="outlined" color="primary">
                         Register
                     </Button>
-                </form>)}
+                </form>) :
+                <EmailConfirm />}
             <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
                 <Button
                     color="inherit"
