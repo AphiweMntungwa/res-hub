@@ -91,9 +91,9 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
         try {
             const response = await axiosInstance.post('/StudentResident/register', { ...data, resName: res.name, residenceId: res.resId, roomNumber, userName: data.email });
             console.log(response);
-            const { token } = response.data;
+            const { accessToken } = response.data;
             // Save the token in cookies
-            Cookies.set('token', token, { expires: 1 }); // Expires in 1 day
+            Cookies.set('token', accessToken, { expires: 1 }); // Expires in 1 day
             // router.push(`/residence?resId=${res.resId}`);
         } catch (error) {
             console.log(error)

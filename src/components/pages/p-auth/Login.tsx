@@ -38,8 +38,8 @@ const Login = () => {
         try {
             const response = await axiosInstance.post('StudentResident/login', data);
             console.log(response);
-            const { token } = response.data;
-            Cookies.set('token', token, { expires: 1 }); // Expires in 1 day
+            const { accessToken } = response.data;
+            Cookies.set('token', accessToken, { expires: 1 }); // Expires in 1 day
         } catch (error: any) {
             setErrorMessage(error?.response?.data);
         }

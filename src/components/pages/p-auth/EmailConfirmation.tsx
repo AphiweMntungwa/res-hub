@@ -30,6 +30,14 @@ const EmailConfirm = () => {
 
     const onSubmit: SubmitHandler<Inputs> = async (data) => {
         console.log(data);
+        try {
+            const response = await axiosInstance.post('/StudentResident/verify-email', { ...data, email: '21829644@dut4life.ac.za' });
+            console.log(response);
+            // router.push(`/residence?resId=${res.resId}`);
+        } catch (error) {
+            console.log(error)
+            return [];
+        }
     }
 
     return (
@@ -49,8 +57,11 @@ const EmailConfirm = () => {
                         helperText={errors.code?.message}
                     />
                 </div>
-                <Button type="submit" variant="outlined" color="primary">
+                <Button  type="submit" variant="outlined" color="success">
                     Verify
+                </Button>
+                <Button className='ml-2' variant="outlined" color="primary">
+                    Resend Email
                 </Button>
             </form>
             {/* {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null} */}
