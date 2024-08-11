@@ -5,7 +5,8 @@ const axiosInstance = axios.create({
     baseURL: 'https://localhost:7217/api',
     httpsAgent: new (require('https').Agent)({
         rejectUnauthorized: false
-    })
+    }),
+    withCredentials: true
 });
 
 export default axiosInstance;

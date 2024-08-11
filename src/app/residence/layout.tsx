@@ -7,7 +7,6 @@ export default async function DashboardLayout({
     children: React.ReactNode,
 }) {
 
-
     return (
         <main>
             {/* Include shared UI here e.g. a header or sidebar */}

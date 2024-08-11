@@ -3,12 +3,14 @@ import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { TextField, Autocomplete, Button, Typography, Stepper, StepLabel, Step, Box } from '@mui/material';
+import { TextField, Autocomplete, Button, Typography, Stepper, StepLabel, Step, Box, Alert } from '@mui/material';
 import Input from '@mui/joy/Input';
 import axiosInstance from '@/lib/axiosInstance';
-import Cookies from 'js-cookie';
+// import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
-import EmailConfirm from './EmailConfirmation';
+import { parseCookies } from 'nookies';
+
+const AlertSignUp = React.lazy(() => import('./AlertSignUp'));
 
 type Inputs = {
     studentNumber: string;
@@ -48,7 +50,7 @@ const validationSchema = Yup.object().shape({
         }),
     password: Yup.string()
         .required('Password is required')
-        .min(6, 'Password must be at least 6 characters')
+        .min(7, 'Password must be at least 7 characters')
         .matches(/[A-Z]/, 'Passwords must have at least one uppercase letter (A-Z).')
         .matches(/[a-z]/, 'Passwords must have at least one lowercase letter (a-z).')
         .matches(/[0-9]/, 'Passwords must have at least one digit (0-9).')
@@ -57,13 +59,24 @@ const validationSchema = Yup.object().shape({
         .oneOf([Yup.ref('password')], 'Passwords must match')
 });
 
-const steps = ['Add Residence Information', 'Create Account', 'Email Confirmation'];
+const steps = ['Add Residence Information', 'Create Account'];
 
 const Register: React.FC<ResidenceProps> = ({ residences }) => {
+
     const router = useRouter();
     const [activeStep, setActiveStep] = React.useState(0);
     const [res, setRes] = React.useState<any | null>(residences[0]);
     const [roomNumber, setRoomNumber] = React.useState<string>("1");
+    const [isOpen, setIsOpen] = React.useState(false);
+
+    React.useEffect(() => {
+        const cookies = parseCookies();
+        const token = cookies['jwt-token']; // Replace with your actual token name
+        if (token) {
+            // User is authenticated, redirect to another page
+            router.push('/residence'); // Replace with the page you want to redirect to
+        }
+    }, [router]);
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -91,10 +104,13 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
         try {
             const response = await axiosInstance.post('/StudentResident/register', { ...data, resName: res.name, residenceId: res.resId, roomNumber, userName: data.email });
             console.log(response);
-            const { accessToken } = response.data;
-            // Save the token in cookies
-            Cookies.set('token', accessToken, { expires: 1 }); // Expires in 1 day
-            // router.push(`/residence?resId=${res.resId}`);
+            const { accessToken, residenceId, successful } = response.data;
+            // Save the user fields
+            localStorage.setItem('residenceId', residenceId);
+            // Cookies.set('token', accessToken, { expires: 1 }); // Expires in 1 day
+            setIsOpen(successful)
+            setRes(residenceId)
+            // router.push(`/residence?resId=${residenceId}`);
         } catch (error) {
             console.log(error)
             return [];
@@ -121,7 +137,9 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                 })}
             </Stepper>
 
-            {activeStep === 0 ? (<Box className="pt-5">
+            {isOpen ? <Alert variant="outlined" severity="success">
+                <p>"You Have Successfully registered for a reshub account"</p>
+            </Alert> : activeStep === 0 ? (<Box className="pt-5">
                 <Autocomplete
                     id="grouped-demo"
                     options={options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter))}
@@ -149,7 +167,7 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                         },
                     }}
                 />
-            </Box>) : activeStep === 1 ?
+            </Box>) :
                 (<form style={{ minWidth: "50%" }} onSubmit={handleSubmit(onSubmit)}>
                     <div>
                         <TextField
@@ -217,8 +235,7 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                     <Button type="submit" variant="outlined" color="primary">
                         Register
                     </Button>
-                </form>) :
-                <EmailConfirm />}
+                </form>)}
             <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
                 <Button
                     color="inherit"
@@ -233,6 +250,7 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                     Next
                 </Button>
             </Box>
+            <AlertSignUp isOpen={isOpen} resId={res} />
         </React.Fragment >
     );
 };

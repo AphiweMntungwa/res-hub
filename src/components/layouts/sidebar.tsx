@@ -23,7 +23,7 @@ import axiosInstance from "@/lib/axiosInstance";
 
 
 export default function TemporaryDrawer() {
-  const [resName, setResName] = React.useState<Promise<string>>();
+  const [resName, setResName] = React.useState<string>();
   const searchParams = useSearchParams();
   const resId = searchParams.get('resId');
 
@@ -50,13 +50,35 @@ export default function TemporaryDrawer() {
       const response = await axiosInstance.get(`/Residence/name/${resId}`);
       return response.data;
     } catch (error) {
-      return 'Loading...'
+      return "";
     }
   }
 
   React.useEffect(() => {
-    const residenceName = fetchResidenceName();
-    setResName(residenceName)
+    const getResidenceName = async () => {
+      const residenceName = await fetchResidenceName();
+      const existingName = localStorage.getItem("residenceName")?.toString();
+
+      console.log(existingName)
+      console.log(residenceName)
+      if (!existingName) {
+        residenceName.length && localStorage.setItem("residenceName", residenceName);
+        setResName(residenceName);
+      }
+      else {
+        if(existingName == residenceName) {
+          const res = localStorage.getItem("residenceName")?.toString();
+          setResName(res);
+        }
+        else{
+          localStorage.setItem("residenceName", residenceName);
+          setResName(residenceName);
+        }
+      }
+    };
+
+    getResidenceName();
+
   }, [])
 
 
@@ -111,7 +133,7 @@ export default function TemporaryDrawer() {
               component="div"
               sx={{ flexGrow: 1, display: { sm: 'block' } }}
             >
-             <span> {resName}</span>
+              <span> {resName}</span>
             </Typography>
             {/* <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
               {navItems.map((item) => (
