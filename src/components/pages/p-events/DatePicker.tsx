@@ -14,7 +14,7 @@ const ControlledComponent: React.FC<DatePickerProps> = ({ setDateOfEventValue, d
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DemoContainer components={['DatePicker']}>
-        <DatePicker value={dateOfEventValue} onChange={(newValue) => setDateOfEventValue(newValue)} />
+        <DatePicker disablePast value={dateOfEventValue} onChange={(newValue) => setDateOfEventValue(newValue)} />
       </DemoContainer>
     </LocalizationProvider>
   );

@@ -16,6 +16,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import AddTaskOutlinedIcon from '@mui/icons-material/AddTaskOutlined'; 
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import { IconButton } from '@mui/material';
+import { useRouter } from 'next/navigation';
 
 interface Event {
     id: number;
@@ -45,6 +46,7 @@ const AlertDialogSlideAddEvent = lazy(() => import('@/components/pages/p-events/
 
 const Events: React.FC<EventProps> = (props) => {
     const [openDialog, setOpenDialog] = useState(false);
+    const router = useRouter();
 
     const handleClickOpen = () => {
         setOpenDialog(true);
@@ -54,6 +56,9 @@ const Events: React.FC<EventProps> = (props) => {
         setOpenDialog(false);
     };
 
+    const handleNavigateToDetails = (id: number) => {
+        router.push(`events/${id}`);
+    }
 
     return (
         <React.Fragment>
@@ -69,7 +74,7 @@ const Events: React.FC<EventProps> = (props) => {
                 </ListItem>
                 {props.events.map(e => (
                     <ListItem key={e.id}>
-                        <ListItemButton>
+                        <ListItemButton onClick={() => handleNavigateToDetails(e.id)}>
                             <ListItemAvatar>
                                 <Avatar>
                                     <ImageIcon />
@@ -80,8 +85,6 @@ const Events: React.FC<EventProps> = (props) => {
                                 secondary={convertToDate(e.dateOfEvent)}
                             />
                         </ListItemButton>
-
-                        {/* <ListItemText primary="Photos" secondary="Jan 9, 2014" /> */}
                     </ListItem>
                 ))}
             </List>

@@ -27,6 +27,7 @@ const validationSchema = Yup.object().shape({
 
 const Login = () => {
     const [errorMessage, setErrorMessage] = React.useState("");
+    const [isOpen, setIsOpen] = React.useState(false);
     const router = useRouter();
 
     const { register, handleSubmit, formState: { errors } } = useForm<Inputs>({
@@ -34,16 +35,21 @@ const Login = () => {
     });
 
     const onSubmit: SubmitHandler<Inputs> = async (data) => {
-        console.log(data);
         try {
             const response = await axiosInstance.post('StudentResident/login', data);
             console.log(response);
-            // const { data: accessToken } = response;
-            // Cookies.set('token', accessToken, { expires: 1 }); // Expires in 1 day
+            setErrorMessage("");
+            setIsOpen(response.data.successful)
         } catch (error: any) {
             setErrorMessage(error?.response?.data);
         }
     }
+
+    React.useEffect(() => {
+        if (isOpen) {
+            window.location.href = `/residence`;
+        }
+    }, [isOpen])
 
     return (
         <React.Fragment>
@@ -84,6 +90,9 @@ const Login = () => {
                     Sign In
                 </Button>
             </form>
+            {isOpen ? <Alert variant="outlined" severity="success">
+                <p>You are Logged In, redirecting...</p>
+            </Alert> : null}
             {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
             <Typography variant="body2" component="p" style={{ marginTop: '10px' }}>
                 Don&apos;t have an account?

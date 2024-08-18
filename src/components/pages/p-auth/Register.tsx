@@ -138,7 +138,7 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
             </Stepper>
 
             {isOpen ? <Alert variant="outlined" severity="success">
-                <p>"You Have Successfully registered for a reshub account"</p>
+                <p>You Have Successfully registered for a Reshub account</p>
             </Alert> : activeStep === 0 ? (<Box className="pt-5">
                 <Autocomplete
                     id="grouped-demo"

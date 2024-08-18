@@ -22,6 +22,7 @@ interface Event {
     eventName: string;
     dateOfEvent: any;
     type: string;
+    description: string;
 }
 
 
@@ -45,6 +46,7 @@ const typeOptions = [
 
 export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose }) => {
     const [name, setName] = React.useState('');
+    const [desc, setDesc] = React.useState('');
     const [eventTypeVal, setEventTypeValue] = React.useState<any | null>(typeOptions[0]);
     const [dateOfEventValue, setDateOfEventValue] = React.useState<Dayjs | null>(null);
 
@@ -79,6 +81,10 @@ export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose })
                     noValidate
                     autoComplete="off"
                 >
+                    <React.Suspense fallback={<div>Loading...</div>}>
+                        <DatePicker dateOfEventValue={dateOfEventValue} setDateOfEventValue={setDateOfEventValue} />
+                    </React.Suspense>
+
                     <Autocomplete
                         disablePortal
                         id="combo-box-demo"
@@ -102,23 +108,22 @@ export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose })
                             setName(event.target.value);
                         }}
                     />
-                    <React.Suspense fallback={<div>Loading...</div>}>
-                        <DatePicker dateOfEventValue={dateOfEventValue} setDateOfEventValue={setDateOfEventValue} />
-                    </React.Suspense>
+                    <TextField
+                        id="outlined-controlled"
+                        label="Description Of Event"
+                        value={desc}
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                            setDesc(event.target.value);
+                        }}
+                    />
                 </Box>
-
-                {/* <DialogContent>
-                    <DialogContentText id="alert-dialog-slide-description">
-                        Let Google help apps determine location. This means sending anonymous
-                        location data to Google, even when no apps are running.
-                    </DialogContentText>
-                </DialogContent> */}
                 <DialogActions>
                     <Button onClick={() => {
                         const newEvent: Event = {
                             eventName: name,
                             dateOfEvent: dateOfEventValue,
                             type: eventTypeVal.id,
+                            description: desc
                         };
                         handleSubmitAddEvent(newEvent);
                     }

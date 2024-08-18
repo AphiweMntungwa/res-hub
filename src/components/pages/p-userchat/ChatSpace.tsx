@@ -26,9 +26,14 @@ export default function ChatSpace({
 
     React.useEffect(() => {
         socket.on('receive-message', (data) => {
-            setMessageList(oldMessage => [...oldMessage, data])
-        })
-    }, [socket])
+            setMessageList(oldMessage => [...oldMessage, data]);
+        });
+    
+        // Cleanup to avoid multiple listeners
+        return () => {
+            socket.off('receive-message');
+        };
+    }, [])
 
     return (
         <React.Fragment>
@@ -60,7 +65,7 @@ export default function ChatSpace({
                 </Grid>
                 <Grid item xs={12} display="flex" flexDirection="column" justifyContent="center">
                     {messageList.map(singleMessage =>
-                        <div>
+                        <div key={singleMessage}>
                             <h4>{singleMessage}</h4>
                             <Divider orientation="horizontal" />
                         </div>

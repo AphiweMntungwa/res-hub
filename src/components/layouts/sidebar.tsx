@@ -21,12 +21,17 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import axiosInstance from "@/lib/axiosInstance";
 
+interface UserInfo {
+  email: string;
+  id: string;
+  residenceId: number;
+  residenceName: string;
+  userName: string;
+  fullName: string;
+}
 
 export default function TemporaryDrawer() {
-  const [resName, setResName] = React.useState<string>();
-  const searchParams = useSearchParams();
-  const resId = searchParams.get('resId');
-
+  const [userInfo, setUserInfo] = React.useState<UserInfo>();
   const [state, setState] = React.useState({
     left: false,
   });
@@ -45,42 +50,28 @@ export default function TemporaryDrawer() {
         setState({ ...state, left: open });
       };
 
-  async function fetchResidenceName(): Promise<string> {
-    try {
-      const response = await axiosInstance.get(`/Residence/name/${resId}`);
-      return response.data;
-    } catch (error) {
-      return "";
-    }
-  }
+
 
   React.useEffect(() => {
-    const getResidenceName = async () => {
-      const residenceName = await fetchResidenceName();
-      const existingName = localStorage.getItem("residenceName")?.toString();
+    console.log("this is how persisstent it is:")
+    async function execute() {
 
-      console.log(existingName)
-      console.log(residenceName)
-      if (!existingName) {
-        residenceName.length && localStorage.setItem("residenceName", residenceName);
-        setResName(residenceName);
-      }
-      else {
-        if(existingName == residenceName) {
-          const res = localStorage.getItem("residenceName")?.toString();
-          setResName(res);
-        }
-        else{
-          localStorage.setItem("residenceName", residenceName);
-          setResName(residenceName);
+      async function fetchMe(): Promise<any> {
+        try {
+          const response = await axiosInstance.get(`/StudentResident/Me`);
+          return response.data;
+        } catch (error) {
+          return error;
         }
       }
-    };
 
-    getResidenceName();
+      const response = await fetchMe();
+      setUserInfo(response);
+      sessionStorage.setItem('userInfo', JSON.stringify(response));
+    }
+    execute()
 
   }, [])
-
 
   const list = () => (
     <Box
@@ -133,15 +124,17 @@ export default function TemporaryDrawer() {
               component="div"
               sx={{ flexGrow: 1, display: { sm: 'block' } }}
             >
-              <span> {resName}</span>
+              <span> {userInfo?.residenceName}</span>
             </Typography>
-            {/* <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-              {navItems.map((item) => (
-                <Button key={item} sx={{ color: '#fff' }}>
-                  {item}
-                </Button>
-              ))}
-            </Box> */}
+            <div className='flex flex-col py-2'>
+              <Typography component="span">
+                {userInfo?.email}
+              </Typography>
+
+              <Typography component="span" gutterBottom>
+                {userInfo?.fullName}
+              </Typography>
+            </div>
           </Toolbar>
         </AppBar>
         <Drawer
