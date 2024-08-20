@@ -1,39 +1,61 @@
-"use client"
+"use client";
 
 import * as React from 'react';
 import Grid from '@mui/material/Grid';
-import { io } from 'socket.io-client';
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import SendIcon from '@mui/icons-material/Send';
 
-const socket = io("http://localhost:3001");
+import { socket, sendMessage, onMessage, joinRoom, leaveRoom, disconnectSocket } from '@/socket';// Adjust the import path
 
 export default function ChatSpace({
-    userChat
+    userChat,
+    roomId
 }: {
-    userChat: string
+    userChat: string,
+    roomId: string
 }) {
-    const [message, writeMessage] = React.useState("")
-    const [messageList, setMessageList] = React.useState<string[]>(["one"])
+    const [message, writeMessage] = React.useState("");
+    const [messageList, setMessageList] = React.useState<string[]>(["one"]);
 
     function handleSubmit(message: string): void {
-        socket.emit("send-message", message)
-        writeMessage("")
+        sendMessage(roomId, message); // Use the modular sendMessage function
+        writeMessage("");
     }
 
     React.useEffect(() => {
-        socket.on('receive-message', (data) => {
+
+        if (!socket.connected) {
+            socket.connect();
+        }
+
+        // Define handlers for socket events
+        const handleMessage = (data: string) => {
             setMessageList(oldMessage => [...oldMessage, data]);
-        });
-    
-        // Cleanup to avoid multiple listeners
-        return () => {
-            socket.off('receive-message');
         };
-    }, [])
+
+        onMessage(handleMessage);
+        
+        const handleConnect = () => {
+            console.log('Connected:', socket.id);
+            joinRoom(roomId); // Join the chat room when the component mounts
+        };
+
+        // Setup socket event listeners
+        socket.on('connect', handleConnect);
+        socket.on('message', handleMessage);
+
+        // Cleanup on component unmount
+        return () => {
+            socket.off('connect', handleConnect); // Remove specific handler
+            socket.off('message', handleMessage); // Remove specific handler
+            leaveRoom(roomId);
+            socket.disconnect();
+        };
+
+    }, [roomId]); // Depend on roomId so it will update if roomId changes
 
     return (
         <React.Fragment>
@@ -58,18 +80,21 @@ export default function ChatSpace({
                             value={message}
                         />
                         <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-                        <IconButton onKeyDown={e => e.key === "Enter" ? handleSubmit(message) : ""} onClick={(e) => handleSubmit(message)} color="primary" sx={{ p: '10px' }} aria-label="directions">
+                        <IconButton
+                            onKeyDown={e => e.key === "Enter" ? handleSubmit(message) : ""}
+                            onClick={() => handleSubmit(message)}
+                            color="primary" sx={{ p: '10px' }} aria-label="directions">
                             <SendIcon />
                         </IconButton>
                     </Paper>
                 </Grid>
                 <Grid item xs={12} display="flex" flexDirection="column" justifyContent="center">
-                    {messageList.map(singleMessage =>
-                        <div key={singleMessage}>
+                    {messageList.map((singleMessage, index) => (
+                        <div key={index}>
                             <h4>{singleMessage}</h4>
                             <Divider orientation="horizontal" />
                         </div>
-                    )}
+                    ))}
                 </Grid>
             </Grid>
         </React.Fragment>
