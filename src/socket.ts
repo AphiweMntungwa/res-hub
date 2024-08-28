@@ -18,7 +18,6 @@ export const socket = io(URL, {
 
 // Join a room
 export const joinRoom = (receiverId: string) => {
-    console.log('at least we got here', receiverId)
     socket.emit('join-room', receiverId);
 };
 
@@ -28,8 +27,9 @@ export const leaveRoom = (roomId: string) => {
 };
 
 // Send a message
-export const sendMessage = (receiverId: string, message: string) => {
-    socket.emit('send-message', { receiverId, message });
+export const sendMessage = (receiverId: string, content: string) => {
+    console.log(receiverId, content)
+    socket.emit('send-message', {receiverId, content });
 };
 
 // Listen for messages

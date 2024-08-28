@@ -31,16 +31,16 @@ export default function ChatSpace({
     const [messageList, setMessageList] = React.useState<Message[]>([]);
     const chatContainerRef = React.useRef<HTMLDivElement | null>(null);
 
-    function handleSubmit(message: string): void {
-        sendMessage(receiverId, message); // Use the modular sendMessage function
+    function handleSubmit(content: string): void {
+        sendMessage(receiverId, content ); // Use the modular sendMessage function
         writeMessage("");
     }
 
     React.useEffect(() => {
         if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+            chatContainerRef.current.scrollIntoView({ behavior: 'smooth' });
         }
-    }, []);
+    }, [chatContainerRef, messageList]);
 
     React.useEffect(() => {
         const fetchMessages = async () => {
@@ -95,7 +95,27 @@ export default function ChatSpace({
 
     return (
         <React.Fragment>
-            <Grid container ref={chatContainerRef}>
+            <Grid container>
+                <Card sx={{ paddingBlock: "84px", width: "100%", minWidth: 275, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {messageList.map((message, index) => (
+                        <Alert ref={index === messageList.length - 1 ? chatContainerRef : null} key={message.MessageId} icon={false} sx={{
+                            marginInline: '3px',
+                            width: "80%",
+                            alignSelf: message.SenderId === receiverId ? 'flex-start' : 'flex-end',
+                            backgroundColor: message.SenderId === receiverId ? '#f5f5f5' : '#e0f7fa'
+                        }}>
+                            <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                                {message.FirstName}
+                            </Typography>
+                            <Typography variant="h6" component="div">
+                                {message.Content}
+                            </Typography>
+                            <Typography sx={{ fontSize: 10 }} color="text.secondary" >
+                                {FormatTimestamp(message.Timestamp)}
+                            </Typography>
+                        </Alert>
+                    ))}
+                </Card>
                 <Grid item xs={12} display="flex" justifyContent="center">
                     <Paper
                         component="form"
@@ -123,27 +143,6 @@ export default function ChatSpace({
                         </IconButton>
                     </Paper>
                 </Grid>
-                <Card  sx={{ paddingBlock: "84px", width: "100%", minWidth: 275, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {messageList.map((message) => (
-                        <Alert key={message.MessageId} icon={false} sx={{
-                            marginInline: '3px',
-                            width: "80%",
-                            alignSelf: message.SenderId === receiverId ? 'flex-start' : 'flex-end',
-                            backgroundColor: message.SenderId === receiverId ? '#f5f5f5' : '#e0f7fa'
-                        }}>
-                            <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                                {message.FirstName}
-                            </Typography>
-                            <Typography variant="h6" component="div">
-                                {message.Content}
-                            </Typography>
-                            <Typography sx={{ fontSize: 10 }} color="text.secondary" >
-                                { FormatTimestamp( message.Timestamp)}
-                            </Typography>
-                        </Alert>
-
-                    ))}
-                </Card>
             </Grid>
         </React.Fragment>
     )
