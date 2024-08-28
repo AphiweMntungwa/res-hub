@@ -13,8 +13,8 @@ interface UserChatProps {
 
 const UserChat: React.FC<UserChatProps> = (props) => {
     return (
-        <section className="flex min-h-screen flex-col items-center justify-between pt-20 px-8">
-            <ChatSpace userChat={props.params.userChat} roomId={props.params.userChat}  />
+        <section className="flex min-h-screen flex-col items-center justify-between">
+            <ChatSpace receiverId={props.params.userChat}  />
         </section>
     );
 };

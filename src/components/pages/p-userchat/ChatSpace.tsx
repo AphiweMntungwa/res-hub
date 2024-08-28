@@ -7,40 +7,76 @@ import InputBase from '@mui/material/InputBase';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import SendIcon from '@mui/icons-material/Send';
+import { Card, Alert, CardContent, Typography, CardHeader, Button } from '@mui/material';
 
-import { socket, sendMessage, onMessage, joinRoom, leaveRoom, disconnectSocket } from '@/socket';// Adjust the import path
+import { socket, sendMessage, onMessage, joinRoom, leaveRoom, disconnectSocket } from '@/socket';
+import { axiosExpressInstance } from '@/lib/axiosInstance';
+import FormatTimestamp from '@/lib/DateConverter';
+
+interface Message {
+    MessageId: string;
+    SenderId: string;
+    ReceiverId: string;
+    Content: string;
+    Timestamp: string;
+    FirstName: string;
+}
 
 export default function ChatSpace({
-    userChat,
-    roomId
+    receiverId
 }: {
-    userChat: string,
-    roomId: string
+    receiverId: string
 }) {
     const [message, writeMessage] = React.useState("");
-    const [messageList, setMessageList] = React.useState<string[]>(["one"]);
+    const [messageList, setMessageList] = React.useState<Message[]>([]);
+    const chatContainerRef = React.useRef<HTMLDivElement | null>(null);
 
     function handleSubmit(message: string): void {
-        sendMessage(roomId, message); // Use the modular sendMessage function
+        sendMessage(receiverId, message); // Use the modular sendMessage function
         writeMessage("");
     }
 
     React.useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, []);
+
+    React.useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const response = await axiosExpressInstance.get(`/messages`, {
+                    params: {
+                        receiverId
+                    }
+                });
+                console.log(response.data)
+                setMessageList(response.data);
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+            }
+        };
+
+        fetchMessages();
+    }, [receiverId]);
+
+    React.useEffect(() => {
 
         if (!socket.connected) {
+            console.log('lkjfs')
             socket.connect();
         }
 
         // Define handlers for socket events
         const handleMessage = (data: string) => {
-            setMessageList(oldMessage => [...oldMessage, data]);
+            // setMessageList(oldMessage => [...oldMessage, data]);
         };
 
         onMessage(handleMessage);
-        
+
         const handleConnect = () => {
             console.log('Connected:', socket.id);
-            joinRoom(roomId); // Join the chat room when the component mounts
+            joinRoom(receiverId); // Join the chat room when the component mounts
         };
 
         // Setup socket event listeners
@@ -49,18 +85,17 @@ export default function ChatSpace({
 
         // Cleanup on component unmount
         return () => {
-            socket.off('connect', handleConnect); // Remove specific handler
-            socket.off('message', handleMessage); // Remove specific handler
-            leaveRoom(roomId);
+            socket.off('connect', handleConnect);
+            socket.off('message', handleMessage);
+            leaveRoom(receiverId);
             socket.disconnect();
         };
 
-    }, [roomId]); // Depend on roomId so it will update if roomId changes
+    }, []);
 
     return (
         <React.Fragment>
-            <Grid container>
-                <h2>{userChat}</h2>
+            <Grid container ref={chatContainerRef}>
                 <Grid item xs={12} display="flex" justifyContent="center">
                     <Paper
                         component="form"
@@ -88,14 +123,27 @@ export default function ChatSpace({
                         </IconButton>
                     </Paper>
                 </Grid>
-                <Grid item xs={12} display="flex" flexDirection="column" justifyContent="center">
-                    {messageList.map((singleMessage, index) => (
-                        <div key={index}>
-                            <h4>{singleMessage}</h4>
-                            <Divider orientation="horizontal" />
-                        </div>
+                <Card  sx={{ paddingBlock: "84px", width: "100%", minWidth: 275, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {messageList.map((message) => (
+                        <Alert key={message.MessageId} icon={false} sx={{
+                            marginInline: '3px',
+                            width: "80%",
+                            alignSelf: message.SenderId === receiverId ? 'flex-start' : 'flex-end',
+                            backgroundColor: message.SenderId === receiverId ? '#f5f5f5' : '#e0f7fa'
+                        }}>
+                            <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                                {message.FirstName}
+                            </Typography>
+                            <Typography variant="h6" component="div">
+                                {message.Content}
+                            </Typography>
+                            <Typography sx={{ fontSize: 10 }} color="text.secondary" >
+                                { FormatTimestamp( message.Timestamp)}
+                            </Typography>
+                        </Alert>
+
                     ))}
-                </Grid>
+                </Card>
             </Grid>
         </React.Fragment>
     )

@@ -10,8 +10,37 @@ import Avatar from '@mui/material/Avatar';
 import PersonIcon from '@mui/icons-material/Person';
 import Grid from '@mui/material/Grid';
 import Link from 'next/link';
+import { axiosExpressInstance } from '@/lib/axiosInstance';
+
+interface ChatUser {
+    FirstName: string;
+    Id: string;
+    LastName: string;
+    ResidenceId: number;
+    RoomNumber: number;
+    StudentNumber: string;
+}
 
 export default function ChatList() {
+
+    const [recentChats, setRecentChats] = React.useState<ChatUser[]>([]);
+
+    React.useEffect(() => {
+        const fetchRecentChats = async () => {
+            try {
+                const response = await axiosExpressInstance.get("/recent-chats");
+                console.log(response.data); // Handle the response data
+                setRecentChats(response.data);
+                return response.data;
+            } catch (error) {
+                console.error('Error fetching recent chats:', error);
+            }
+        };
+
+        fetchRecentChats();
+
+    }, [])
+
     return (
         <React.Fragment>
             <Grid container>
@@ -21,16 +50,16 @@ export default function ChatList() {
                             User Chats
                         </ListSubheader>
                     } sx={{ width: '100%', maxWidth: 560, bgcolor: 'background.paper' }}>
-                        {['User 1', 'User 2', 'User 3', 'User 4', 'User 5'].map(user => {
+                        {recentChats.map(user => {
                             return (
-                                <Link href={`inbox/${user}`} key={user}>
+                                <Link href={`inbox/${user.Id}`} key={user.Id}>
                                     <ListItem >
                                         <ListItemAvatar>
                                             <Avatar>
                                                 <PersonIcon />
                                             </Avatar>
                                         </ListItemAvatar>
-                                        <ListItemText primary={user} secondary="Jan 9, 2014" />
+                                        <ListItemText primary={user.FirstName + " " + user.LastName} secondary="Jan 9, 2014" />
                                     </ListItem>
                                 </Link>
                             )
