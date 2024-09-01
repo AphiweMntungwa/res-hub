@@ -20,6 +20,7 @@ import Badge from '@mui/material/Badge';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import axiosInstance from "@/lib/axiosInstance";
+import { socket, sendMessage, onMessage, joinRoom, leaveRoom, disconnectSocket } from '@/socket';
 
 interface UserInfo {
   email: string;
@@ -50,6 +51,20 @@ export default function TemporaryDrawer() {
         setState({ ...state, left: open });
       };
 
+
+  React.useEffect(() => {
+
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+
+
+    return () => {
+      socket.disconnect();
+    };
+
+  }, []);
 
 
   React.useEffect(() => {

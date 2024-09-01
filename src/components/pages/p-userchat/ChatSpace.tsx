@@ -32,7 +32,7 @@ export default function ChatSpace({
     const chatContainerRef = React.useRef<HTMLDivElement | null>(null);
 
     function handleSubmit(content: string): void {
-        sendMessage(receiverId, content ); // Use the modular sendMessage function
+        sendMessage(receiverId, content); // Use the modular sendMessage function
         writeMessage("");
     }
 
@@ -50,7 +50,6 @@ export default function ChatSpace({
                         receiverId
                     }
                 });
-                console.log(response.data)
                 setMessageList(response.data);
             } catch (error) {
                 console.error('Error fetching messages:', error);
@@ -62,21 +61,24 @@ export default function ChatSpace({
 
     React.useEffect(() => {
 
-        if (!socket.connected) {
-            console.log('lkjfs')
-            socket.connect();
-        }
+        // if (!socket.connected) {
+        //     socket.connect();
+        // }
 
-        // Define handlers for socket events
-        const handleMessage = (data: string) => {
-            // setMessageList(oldMessage => [...oldMessage, data]);
+
+        const handleMessage = (data: Message) => {
+            setMessageList(oldMessages => {
+                if (oldMessages.length > 0 && oldMessages[oldMessages.length - 1].MessageId === data.MessageId) {
+                    return oldMessages; 
+                }
+                return [...oldMessages, data];
+            });
         };
 
         onMessage(handleMessage);
 
         const handleConnect = () => {
-            console.log('Connected:', socket.id);
-            joinRoom(receiverId); // Join the chat room when the component mounts
+            joinRoom(receiverId);
         };
 
         // Setup socket event listeners
@@ -88,7 +90,7 @@ export default function ChatSpace({
             socket.off('connect', handleConnect);
             socket.off('message', handleMessage);
             leaveRoom(receiverId);
-            socket.disconnect();
+            // socket.disconnect();
         };
 
     }, []);
