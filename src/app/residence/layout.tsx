@@ -1,4 +1,5 @@
 import TemporaryDrawer from "@/components/layouts/sidebar"
+import StoreProvider from "../storeProvider"
 
 
 export default async function DashboardLayout({
@@ -10,7 +11,9 @@ export default async function DashboardLayout({
     return (
         <main>
             {/* Include shared UI here e.g. a header or sidebar */}
-            <TemporaryDrawer />
+             <StoreProvider>
+                <TemporaryDrawer />
+             </StoreProvider>
             {children}
         </main>
     )

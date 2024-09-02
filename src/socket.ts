@@ -10,6 +10,11 @@ interface Message {
     FirstName: string;
 }
 
+interface UserMessageNotification {
+    FirstName: string;
+    ReceiverId: string;
+}
+
 const URL = process.env.NODE_ENV === 'production' ? "" : 'http://localhost:3001';
 
 const cookies = nookies.get();
@@ -25,14 +30,37 @@ export const socket = io(URL, {
     }
 });
 
-// Join a room
-export const joinRoom = (receiverId: string) => {
-    socket.emit('join-room', receiverId);
+export const joinRoom = (receiverId: string, maxAttempts: number = 3) => {
+    let attempts = 0;
+
+    const attemptJoin = () => {
+        attempts += 1;
+
+        socket.emit('join-room', receiverId, (ack: boolean) => {
+            if (!ack && attempts < maxAttempts) {
+                console.log(`Attempt ${attempts} to join room ${receiverId} failed. Retrying...`);
+                setTimeout(attemptJoin, 1000); // Retry after 1 second
+            } else if (!ack) {
+                console.error(`Failed to join room ${receiverId} after ${attempts} attempts.`);
+            } else {
+                console.log(`Successfully joined room ${receiverId}`);
+            }
+        });
+    };
+
+    attemptJoin();
 };
 
-// Leave a room
+export const joinPersonalRoom = () => {
+    socket.emit('join-personal-room');
+};
+
 export const leaveRoom = (roomId: string) => {
     socket.emit('leave-room', roomId);
+};
+
+export const leavePersonalRoom = () => {
+    socket.emit('leave-personal-room');
 };
 
 // Send a message
@@ -44,6 +72,10 @@ export const sendMessage = (receiverId: string, content: string) => {
 // Listen for messages
 export const onMessage = (callback: (message: Message) => void) => {
     socket.on('receive-message', callback);
+};
+
+export const onMessageNotification = (callback: (user: UserMessageNotification) => void) => {
+    socket.on('message-notification', callback);
 };
 
 // Disconnect from socket

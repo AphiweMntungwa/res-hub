@@ -16,11 +16,25 @@ import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
+import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
+import { Avatar } from '@mui/material';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import NotificationsActiveOutlinedIcon from '@mui/icons-material/NotificationsActiveOutlined';
+import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
 
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import axiosInstance from "@/lib/axiosInstance";
-import { socket, sendMessage, onMessage, joinRoom, leaveRoom, disconnectSocket } from '@/socket';
+import { useDispatch, useSelector } from 'react-redux';
+import { socket, joinPersonalRoom, leavePersonalRoom, disconnectSocket, onMessageNotification } from '@/socket';
+
+import { RootState } from '@/lib/store';
+import { addMessageNotification, clearMessageNotifications, resetNotificationCount } from '@/lib/features/messagesSlice';
+
+interface UserMessageNotification {
+  FirstName: string;
+  ReceiverId: string;
+}
+
 
 interface UserInfo {
   email: string;
@@ -33,6 +47,22 @@ interface UserInfo {
 
 export default function TemporaryDrawer() {
   const [userInfo, setUserInfo] = React.useState<UserInfo>();
+  const dispatch = useDispatch();
+  const notifications = useSelector((state: RootState) => state.messages.notifications);
+  const [open, setOpen] = React.useState(false);
+
+  const handleClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason,
+  ) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+
   const [state, setState] = React.useState({
     left: false,
   });
@@ -53,12 +83,22 @@ export default function TemporaryDrawer() {
 
 
   React.useEffect(() => {
-
     if (!socket.connected) {
       socket.connect();
     }
 
+    const handleMessageNotification = (user: UserMessageNotification) => {
+      console.log('here is the user', user)
+      dispatch(addMessageNotification({ name: user.FirstName, count: 1 }));
+    };
 
+    onMessageNotification(handleMessageNotification);
+
+    const handleConnect = () => {
+      joinPersonalRoom();
+    };
+
+    socket.on('connect', handleConnect);
 
     return () => {
       socket.disconnect();
@@ -88,6 +128,13 @@ export default function TemporaryDrawer() {
 
   }, [])
 
+  React.useEffect(() => {
+    if (notifications.length) {
+      console.log(notifications)
+      setOpen(true)
+    }
+  }, [notifications])
+
   const list = () => (
     <Box
       sx={{ width: 250 }}
@@ -95,6 +142,7 @@ export default function TemporaryDrawer() {
       onClick={toggleDrawer(false)}
       onKeyDown={toggleDrawer(false)}
     >
+
       <List>
         {['General', 'Inbox', 'Buses', 'Events', 'Sports'].map((text, index) => (
           <Link key={text} href={`/residence/${text.toLowerCase()}`}>
@@ -137,16 +185,26 @@ export default function TemporaryDrawer() {
             <Typography
               variant="h6"
               component="div"
-              sx={{ flexGrow: 1, display: { sm: 'block' } }}
+              sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
             >
               <span> {userInfo?.residenceName}</span>
             </Typography>
-            <div className='flex flex-col py-2'>
-              <Typography component="span">
-                {userInfo?.email}
-              </Typography>
 
-              <Typography component="span" gutterBottom>
+            <Typography component="span" sx={{ paddingTop: 1, display: { xs: 'block', sm: 'none' } }} gutterBottom>
+              {userInfo?.fullName}
+            </Typography>
+
+            <div className='flex items-center py-2' style={{ marginLeft: 'auto' }}>
+              <IconButton>
+                <NotificationsActiveOutlinedIcon sx={{ color: 'white' }} />
+              </IconButton>
+              <IconButton>
+                <MailOutlinedIcon sx={{ color: 'white' }} />
+              </IconButton>
+              <IconButton>
+                <AccountCircleOutlinedIcon sx={{ color: 'white' }} />
+              </IconButton>
+              <Typography component="span" sx={{ paddingTop: 1.3, display: { xs: 'none', md: 'block' } }} gutterBottom>
                 {userInfo?.fullName}
               </Typography>
             </div>
@@ -159,6 +217,12 @@ export default function TemporaryDrawer() {
         >
           {list()}
         </Drawer>
+        <Snackbar
+          open={open}
+          autoHideDuration={6000}
+          onClose={handleClose}
+          message={notifications.length ? notifications[0].message : "You have New Messages"}
+        />
       </React.Fragment>
     </div>
   );
