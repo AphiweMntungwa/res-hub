@@ -29,6 +29,8 @@ import { socket, joinPersonalRoom, leavePersonalRoom, disconnectSocket, onMessag
 
 import { RootState } from '@/lib/store';
 import { addMessageNotification, clearMessageNotifications, resetNotificationCount } from '@/lib/features/messagesSlice';
+import NotificationsPopper from '../pages/p-sidebar/NotificationsPopper';
+import ProfilePopper from '../pages/p-sidebar/ProfilePopper';
 
 interface UserMessageNotification {
   FirstName: string;
@@ -48,8 +50,33 @@ interface UserInfo {
 export default function TemporaryDrawer() {
   const [userInfo, setUserInfo] = React.useState<UserInfo>();
   const dispatch = useDispatch();
-  const notifications = useSelector((state: RootState) => state.messages.notifications);
+  const notifications = useSelector((state: RootState) => state.messages?.notifications);
   const [open, setOpen] = React.useState(false);
+  const [openNotifyPopper, setOpenNotifyPopper] = React.useState(false);
+  const [openProfilePopper, setOpenProfilePopper] = React.useState(false);
+
+  const anchorRef = React.useRef<HTMLButtonElement | null>(null);
+  const anchorRefProfile = React.useRef<HTMLButtonElement | null>(null);
+
+  const handleTooltipProfileClose = (event: Event | React.SyntheticEvent<Element, Event>) => {
+    setOpenProfilePopper(false);
+  };
+
+  const handleTooltipOpen = () => {
+    setOpenProfilePopper(true);
+  };
+
+  const handleClickAway = (event: MouseEvent | TouchEvent) => {
+    if (anchorRef.current && anchorRef.current.contains(event.target as Node)) {
+      return;
+    }
+    if (anchorRefProfile.current && anchorRefProfile.current.contains(event.target as Node)) {
+      return;
+    }
+    setOpenNotifyPopper(false)
+    setOpenProfilePopper(false)
+
+  };
 
   const handleClose = (
     event: React.SyntheticEvent | Event,
@@ -130,7 +157,6 @@ export default function TemporaryDrawer() {
 
   React.useEffect(() => {
     if (notifications.length) {
-      console.log(notifications)
       setOpen(true)
     }
   }, [notifications])
@@ -201,13 +227,17 @@ export default function TemporaryDrawer() {
               <IconButton>
                 <MailOutlinedIcon sx={{ color: 'white' }} />
               </IconButton>
-              <IconButton>
-                <AccountCircleOutlinedIcon sx={{ color: 'white' }} />
-              </IconButton>
+              <ProfilePopper open={openProfilePopper} handleClickAway={handleClickAway} handleTooltipClose={handleTooltipProfileClose}>
+                <IconButton onClick={handleTooltipOpen}>
+                  <AccountCircleOutlinedIcon sx={{ color: 'white' }} />
+                </IconButton>
+              </ProfilePopper>
               <Typography component="span" sx={{ paddingTop: 1.3, display: { xs: 'none', md: 'block' } }} gutterBottom>
                 {userInfo?.fullName}
               </Typography>
             </div>
+            <NotificationsPopper open={openNotifyPopper} handleClickAway={handleClickAway} anchorEl={anchorRef.current} />
+
           </Toolbar>
         </AppBar>
         <Drawer

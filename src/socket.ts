@@ -8,6 +8,7 @@ interface Message {
     Content: string;
     Timestamp: string;
     FirstName: string;
+    IsRead: boolean;
 }
 
 interface UserMessageNotification {

@@ -10,7 +10,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { Card, Alert, CardContent, Typography, CardHeader, Button } from '@mui/material';
 
 import { socket, sendMessage, onMessage, joinRoom, leaveRoom, disconnectSocket } from '@/socket';
-import { axiosExpressInstance } from '@/lib/axiosInstance';
+import axiosInstance, { axiosExpressInstance } from '@/lib/axiosInstance';
 import FormatTimestamp from '@/lib/DateConverter';
 
 interface Message {
@@ -20,6 +20,7 @@ interface Message {
     Content: string;
     Timestamp: string;
     FirstName: string;
+    IsRead: boolean;
 }
 
 export default function ChatSpace({
@@ -41,6 +42,26 @@ export default function ChatSpace({
             chatContainerRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [chatContainerRef, messageList]);
+
+    React.useEffect(() => {
+        const markMessagesAsRead = async () => {
+            // Check if there are any unread messages
+            const hasUnreadMessages = messageList.some(message => !message.IsRead);
+    
+            if (hasUnreadMessages) {
+                try {
+                    const response = await axiosInstance.get(`/Messages/mark-as-read/${receiverId}`);
+                    // Optionally handle the response if needed
+                } catch (error) {
+                    console.error("Failed to mark messages as read:", error);
+                }
+            }
+        };
+    
+        markMessagesAsRead();
+    }, [messageList, receiverId]);
+    
+
 
     React.useEffect(() => {
         const fetchMessages = async () => {
@@ -69,7 +90,7 @@ export default function ChatSpace({
         const handleMessage = (data: Message) => {
             setMessageList(oldMessages => {
                 if (oldMessages.length > 0 && oldMessages[oldMessages.length - 1].MessageId === data.MessageId) {
-                    return oldMessages; 
+                    return oldMessages;
                 }
                 return [...oldMessages, data];
             });
@@ -99,24 +120,36 @@ export default function ChatSpace({
         <React.Fragment>
             <Grid container>
                 <Card sx={{ paddingBlock: "84px", width: "100%", minWidth: 275, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {messageList.map((message, index) => (
-                        <Alert ref={index === messageList.length - 1 ? chatContainerRef : null} key={message.MessageId} icon={false} sx={{
-                            marginInline: '3px',
-                            width: "80%",
-                            alignSelf: message.SenderId === receiverId ? 'flex-start' : 'flex-end',
-                            backgroundColor: message.SenderId === receiverId ? '#f5f5f5' : '#e0f7fa'
-                        }}>
-                            <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                                {message.FirstName}
-                            </Typography>
-                            <Typography variant="h6" component="div">
-                                {message.Content}
-                            </Typography>
-                            <Typography sx={{ fontSize: 10 }} color="text.secondary" >
-                                {FormatTimestamp(message.Timestamp)}
-                            </Typography>
-                        </Alert>
-                    ))}
+                    {messageList.map((message, index) => {
+                        const isLastMessage = index === messageList.length - 1;
+                        const isUnread = !message.IsRead;
+
+                        const shouldShowDivider = isUnread && message.ReceiverId != receiverId && !messageList.slice(0, index).some(msg => !msg.IsRead);
+
+                        return (
+                            <React.Fragment key={message.MessageId}>
+                                  {shouldShowDivider ? <Divider>unread</Divider> : null}
+                                <Alert ref={isLastMessage ? chatContainerRef : null} icon={false} sx={{
+                                    marginInline: '3px',
+                                    width: "80%",
+                                    alignSelf: message.SenderId === receiverId ? 'flex-start' : 'flex-end',
+                                    backgroundColor: message.SenderId === receiverId ? '#f5f5f5' : '#e0f7fa'
+                                }}>
+                                    <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                                        {message.FirstName}
+                                    </Typography>
+                                    <Typography variant="h6" component="div">
+                                        {message.Content}
+                                    </Typography>
+                                    <Typography sx={{ fontSize: 10 }} color="text.secondary" >
+                                        {FormatTimestamp(message.Timestamp)}
+                                    </Typography>
+                                </Alert>
+                              
+                            </React.Fragment>
+                        );
+                    })}
+
                 </Card>
                 <Grid item xs={12} display="flex" justifyContent="center">
                     <Paper
