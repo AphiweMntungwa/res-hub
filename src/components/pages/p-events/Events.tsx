@@ -65,8 +65,7 @@ const Events: React.FC<EventProps> = (props) => {
             <List sx={{ width: '100%', maxWidth: 800, bgcolor: 'background.paper' }}>
                 <ListItem>
                     <ListItemText
-                        primary={"e.eventName"}
-                        secondary={'convertToDate("e.dateOfEvent")'}
+                        primary="Events at Your Residence"
                     />
                     <IconButton onClick={handleClickOpen}>
                         <AddTaskOutlinedIcon />

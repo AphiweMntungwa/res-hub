@@ -3,6 +3,7 @@ import React from 'react';
 import { cookies } from 'next/headers';
 import axiosInstance from '@/lib/axiosInstance';
 import EventDetailClient from '@/components/pages/p-events/EventDetailClient';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
     title: 'Event Details',
@@ -42,6 +43,9 @@ const EventDetails = async ({ params }: { params: { eventId: string } }) => {
     const { eventId } = params;
     const cookieStore = cookies();
     const token = cookieStore.get('jwt-token')?.value;
+    if (!token) {
+        redirect('/auth/login');
+    }
     const event = await fetchEvent(token, eventId);
 
     return (

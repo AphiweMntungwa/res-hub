@@ -3,6 +3,7 @@ import React from 'react';
 import Events from '@/components/pages/p-events/Events';
 import { cookies } from 'next/headers';
 import axiosInstance from '@/lib/axiosInstance';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
     title: 'Events',
@@ -31,6 +32,9 @@ async function fetchEvents(token : string | undefined): Promise<Event[]> {
 const EventPage = async () => {
     const cookieStore = cookies();
     const token = cookieStore.get('jwt-token')?.value;
+    if (!token) {
+        redirect('/auth/login');
+    }
     const events = await fetchEvents(token);
 
     return (

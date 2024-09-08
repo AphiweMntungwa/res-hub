@@ -1,6 +1,14 @@
 "use client"
 import React, { useState, lazy, Suspense } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, IconButton } from '@mui/material';
+import dayjs from 'dayjs';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import DeleteEventDialog from './DeleteEventDialog';
+import axiosInstance from '@/lib/axiosInstance';
+import { useRouter } from 'next/navigation';
+
+
 
 interface Event {
     id: number;
@@ -28,20 +36,49 @@ function convertToDate(dateString: string) {
     return new Date(dateString).getFullYear();
 }
 
-const AlertDialogSlideAddEvent = lazy(() => import('@/components/pages/p-events/Dialogs').then(module => ({ default: module.AlertDialogSlideAddEvent })));;
+const formatDate = (dateString: string) => {
+    return dayjs(dateString).format('MM/DD/YYYY, hh:mm:ss A'); // Format the date as you want
+};
+
 
 const EventDetailClient: React.FC<EventProps> = ({ event }) => {
-    const [openDialog, setOpenDialog] = useState(false);
+    const [localEvent, setLocalEvent] = useState(event);
+    const [refreshTrigger, setRefreshTrigger] = React.useState(false);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const router = useRouter();
 
-    const handleClickOpen = () => {
-        setOpenDialog(true);
+
+    const handleDeleteClickOpen = () => {
+        setOpenDeleteDialog(true);
     };
 
-    const handleClose = () => {
-        setOpenDialog(false);
+    const handleDeleteClose = () => {
+        setOpenDeleteDialog(false);
     };
 
-    const date = new Date(event.dateOfEvent);
+    const handleDelete = async (eventId: number) => {
+        try {
+            await axiosInstance.delete(`/events/${eventId}`); 
+            router.push('/residence/events'); 
+        } catch (error) {
+            console.error('Error deleting event:', error);
+            // Handle error (e.g., show an error message)
+        }
+    };
+
+    React.useEffect(() => {
+        if (refreshTrigger) {
+            const getRefreshEvents = async () => {
+                const response = await axiosInstance.get(`/Events/${localEvent.id}`)
+                setLocalEvent(response.data)
+                setRefreshTrigger(false)
+            }
+            getRefreshEvents()
+        }
+
+    }, [refreshTrigger])
+
+    const date = new Date(localEvent.dateOfEvent);
 
     return (
         <React.Fragment>
@@ -51,29 +88,41 @@ const EventDetailClient: React.FC<EventProps> = ({ event }) => {
                         Name of Event:
                     </Typography>
                     <Typography variant="h4" gutterBottom>
-                        {event.eventName}
+                        {localEvent.eventName}
                     </Typography>
                     <Typography variant="subtitle2" >
                         Type of Event:
                     </Typography>
                     <Typography variant="h5" gutterBottom>
-                        {eventTypes[event.type]}
+                        {eventTypes[localEvent.type]}
                     </Typography>
 
                     <Typography variant="subtitle2" >
                         Date of event:
                     </Typography>
                     <Typography variant="h6" gutterBottom>
-                        {date.toLocaleString()}
+                        {formatDate(date.toLocaleString())}
                     </Typography>
                     <Typography variant="subtitle2">
                         Event Description:
                     </Typography>
                     <Typography variant="h6" gutterBottom>
-                        {event.description}
+                        {localEvent.description}
                     </Typography>
+                    <IconButton aria-label="edit">
+                        <EditOutlinedIcon color="primary" />
+                    </IconButton>
+                    <IconButton  onClick={() => handleDeleteClickOpen()} aria-label="delete">
+                        <DeleteOutlineOutlinedIcon color="warning" />
+                    </IconButton>
                 </Box>
             </Box>
+            <DeleteEventDialog
+                open={openDeleteDialog}
+                onClose={handleDeleteClose}
+                eventId={localEvent.id}
+                onDelete={handleDelete}
+            />
         </React.Fragment>
     );
 };

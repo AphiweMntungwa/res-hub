@@ -84,9 +84,7 @@ export default function ChatList() {
                                             <PersonIcon />
                                         </Avatar>
                                     </IconButton>
-                                    <Link href={`inbox/${user.Id}`} >
-                                        <ListItemText primary={user.FirstName + " " + user.LastName} secondary="Jan 9, 2014" />
-                                    </Link>
+                                    <ListItemText onClick={() => window.location.href = `/residence/inbox/${user.Id}`} primary={user.FirstName + " " + user.LastName} secondary="Jan 9, 2014" />
                                 </ListItem>
                             )
                         })}
