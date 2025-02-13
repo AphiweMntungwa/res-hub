@@ -16,7 +16,7 @@ import axiosInstance from '@/lib/axiosInstance';
 interface Props {
     open: boolean;
     handleClose: () => void;
-}
+    setRefreshTrigger: React.Dispatch<React.SetStateAction<boolean>>}
 
 interface Event {
     eventName: string;
@@ -44,7 +44,7 @@ const typeOptions = [
     { label: 'Religious', id: 3 }
 ]
 
-export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose }) => {
+export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose, setRefreshTrigger }) => {
     const [name, setName] = React.useState('');
     const [desc, setDesc] = React.useState('');
     const [eventTypeVal, setEventTypeValue] = React.useState<any | null>(typeOptions[0]);
@@ -54,8 +54,8 @@ export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose })
     const handleSubmitAddEvent = async (event: Event) => {
         try {
             const response = await axiosInstance.post('/Events', event);
-            console.log(response);
             handleClose();
+            setRefreshTrigger(true)
         } catch (error) {
             console.log(error)
             return [];

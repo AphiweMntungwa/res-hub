@@ -16,7 +16,8 @@ import ImageIcon from '@mui/icons-material/Image';
 import AddTaskOutlinedIcon from '@mui/icons-material/AddTaskOutlined'; 
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import { IconButton } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import axiosInstance from '@/lib/axiosInstance';
 
 interface Event {
     id: number;
@@ -45,8 +46,12 @@ function convertToDate(dateString: string) {
 const AlertDialogSlideAddEvent = lazy(() => import('@/components/pages/p-events/Dialogs').then(module => ({ default: module.AlertDialogSlideAddEvent })));;
 
 const Events: React.FC<EventProps> = (props) => {
+    const [localEvents, setLocalEvents] = useState(props.events);
+    const [refreshTrigger, setRefreshTrigger] = React.useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const refresh = searchParams.get('refresh');
 
     const handleClickOpen = () => {
         setOpenDialog(true);
@@ -60,6 +65,19 @@ const Events: React.FC<EventProps> = (props) => {
         router.push(`events/${id}`);
     }
 
+    React.useEffect(() => {
+        if (refreshTrigger || refresh === 'true') {
+            const getRefreshEvents = async () => {
+                const response = await axiosInstance.get(`/Events`)
+                setLocalEvents(response.data.$values)
+                setRefreshTrigger(true)
+                router.replace('/residence/events');
+            }
+            getRefreshEvents()
+        }
+
+    }, [refreshTrigger])
+
     return (
         <React.Fragment>
             <List sx={{ width: '100%', maxWidth: 800, bgcolor: 'background.paper' }}>
@@ -71,7 +89,7 @@ const Events: React.FC<EventProps> = (props) => {
                         <AddTaskOutlinedIcon />
                     </IconButton>
                 </ListItem>
-                {props.events.map(e => (
+                {localEvents.map(e => (
                     <ListItem key={e.id}>
                         <ListItemButton onClick={() => handleNavigateToDetails(e.id)}>
                             <ListItemAvatar>
@@ -89,7 +107,7 @@ const Events: React.FC<EventProps> = (props) => {
             </List>
             <Suspense fallback={<div>Loading...</div>}>
                 {openDialog && (
-                    <AlertDialogSlideAddEvent open={openDialog} handleClose={handleClose} />
+                    <AlertDialogSlideAddEvent setRefreshTrigger={setRefreshTrigger} open={openDialog} handleClose={handleClose} />
                 )}
             </Suspense>
         </React.Fragment>

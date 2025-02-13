@@ -59,7 +59,7 @@ const EventDetailClient: React.FC<EventProps> = ({ event }) => {
     const handleDelete = async (eventId: number) => {
         try {
             await axiosInstance.delete(`/events/${eventId}`); 
-            router.push('/residence/events'); 
+            router.push('/residence/events?refresh=true'); 
         } catch (error) {
             console.error('Error deleting event:', error);
             // Handle error (e.g., show an error message)
@@ -71,7 +71,7 @@ const EventDetailClient: React.FC<EventProps> = ({ event }) => {
             const getRefreshEvents = async () => {
                 const response = await axiosInstance.get(`/Events/${localEvent.id}`)
                 setLocalEvent(response.data)
-                setRefreshTrigger(false)
+                setRefreshTrigger(true)
             }
             getRefreshEvents()
         }

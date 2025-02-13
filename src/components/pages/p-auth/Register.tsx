@@ -42,12 +42,7 @@ const validationSchema = Yup.object().shape({
     firstName: Yup.string().required('First Name is required'),
     lastName: Yup.string().required('Last Name is required'),
     email: Yup.string().email('Invalid email address')
-        .required('Email is required')
-        .test('emailMatch', 'Email must match student number format', function (value) {
-            const { studentNumber } = this.parent;
-            const emailRegex = new RegExp(`^${studentNumber}@dut4life\\.ac\\.za$`);
-            return emailRegex.test(value);
-        }),
+        .required('Email is required'),
     password: Yup.string()
         .required('Password is required')
         .min(7, 'Password must be at least 7 characters')
