@@ -1,110 +1,86 @@
 "use client"
 import React, { useState, lazy, Suspense } from 'react';
-import Alert from '@mui/material/Alert';
-import CheckIcon from '@mui/icons-material/Check';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import { Divider } from 'semantic-ui-react';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import Avatar from '@mui/material/Avatar';
-import ImageIcon from '@mui/icons-material/Image';
-import AddTaskOutlinedIcon from '@mui/icons-material/AddTaskOutlined'; 
-import BeachAccessIcon from '@mui/icons-material/BeachAccess';
-import { IconButton } from '@mui/material';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axiosInstance from '@/lib/axiosInstance';
+import { Card, CardContent, CardActions } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
+import { motion } from "framer-motion";
+import AddTaskOutlinedIcon from '@mui/icons-material/AddTaskOutlined';
+import IconButton from '@mui/material/IconButton';
 
 interface Event {
     id: number;
     eventName: string;
+    description: string;
+    type: number;
     dateOfEvent: string;
-    type: string;
+    residenceId: number;
 }
 
-interface EventProps {
-    events: Event[];
-}
+const AlertDialogSlideAddEvent = lazy(() => import('@/components/pages/p-events/Dialogs').then(module => ({ default: module.AlertDialogSlideAddEvent })));
 
-const eventTypes = [
-    'Sports',
-    'Recreation',
-    'Formal',
-    'Religious'
-];
-
-
-// Function to convert date string to Date object
-function convertToDate(dateString: string) {
-    return new Date(dateString).getFullYear();
-}
-
-const AlertDialogSlideAddEvent = lazy(() => import('@/components/pages/p-events/Dialogs').then(module => ({ default: module.AlertDialogSlideAddEvent })));;
-
-const Events: React.FC<EventProps> = (props) => {
+const Events: React.FC<{ events: Event[] }> = (props) => {
     const [localEvents, setLocalEvents] = useState(props.events);
-    const [refreshTrigger, setRefreshTrigger] = React.useState(false);
+    const [refreshTrigger, setRefreshTrigger] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const refresh = searchParams.get('refresh');
 
-    const handleClickOpen = () => {
-        setOpenDialog(true);
-    };
-
-    const handleClose = () => {
-        setOpenDialog(false);
-    };
+    const handleClickOpen = () => setOpenDialog(true);
+    const handleClose = () => setOpenDialog(false);
 
     const handleNavigateToDetails = (id: number) => {
         router.push(`events/${id}`);
-    }
+    };
 
     React.useEffect(() => {
         if (refreshTrigger || refresh === 'true') {
             const getRefreshEvents = async () => {
-                const response = await axiosInstance.get(`/Events`)
-                setLocalEvents(response.data.$values)
-                setRefreshTrigger(true)
+                const response = await axiosInstance.get(`/Events`);
+                setLocalEvents(response.data.$values);
+                setRefreshTrigger(false);
                 router.replace('/residence/events');
-            }
-            getRefreshEvents()
+            };
+            getRefreshEvents();
         }
-
-    }, [refreshTrigger])
+    }, [refreshTrigger]);
 
     return (
         <React.Fragment>
-            <List sx={{ width: '100%', maxWidth: 800, bgcolor: 'background.paper' }}>
-                <ListItem>
-                    <ListItemText
-                        primary="Events at Your Residence"
-                    />
+            <Grid container spacing={3} justifyContent="center">
+                <Grid item xs={12} textAlign="right">
                     <IconButton onClick={handleClickOpen}>
-                        <AddTaskOutlinedIcon />
+                        <AddTaskOutlinedIcon fontSize="large" />
                     </IconButton>
-                </ListItem>
+                </Grid>
                 {localEvents.map(e => (
-                    <ListItem key={e.id}>
-                        <ListItemButton onClick={() => handleNavigateToDetails(e.id)}>
-                            <ListItemAvatar>
-                                <Avatar>
-                                    <ImageIcon />
-                                </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary={e.eventName}
-                                secondary={convertToDate(e.dateOfEvent)}
-                            />
-                        </ListItemButton>
-                    </ListItem>
+                    <Grid item key={e.id} xs={12} sm={6} md={4}>
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Card sx={{ borderRadius: 3, boxShadow: 3, cursor: "pointer" }} onClick={() => handleNavigateToDetails(e.id)}>
+                                <CardContent>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {e.eventName}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {e.description}
+                                    </Typography>
+                                    <Typography variant="caption" display="block" mt={1}>
+                                        {new Date(e.dateOfEvent).toLocaleDateString()}
+                                    </Typography>
+                                </CardContent>
+                                <CardActions>
+                                    <Button size="small" color="primary">
+                                        View Details
+                                    </Button>
+                                </CardActions>
+                            </Card>
+                        </motion.div>
+                    </Grid>
                 ))}
-            </List>
+            </Grid>
             <Suspense fallback={<div>Loading...</div>}>
                 {openDialog && (
                     <AlertDialogSlideAddEvent setRefreshTrigger={setRefreshTrigger} open={openDialog} handleClose={handleClose} />

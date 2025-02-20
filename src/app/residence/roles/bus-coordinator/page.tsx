@@ -4,6 +4,7 @@ import AdminList from '@/components/pages/p-roles/admin/AdminList';
 import axiosInstance from '@/lib/axiosInstance';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import CoordinatorList from '@/components/pages/p-roles/bus-coordinator/CoordinatorList';
 
 export const metadata: Metadata = {
     title: 'Bus Co-ordinators',
@@ -47,7 +48,7 @@ const BusAdmins: React.FC<BusAdmin> = async () => {
 
     return (
         <section className="flex min-h-screen flex-col items-center justify-between pt-20 px-10">
-            <AdminList admins={admins} />
+            <CoordinatorList busAdmins={admins} />
         </section>
     );
 };
