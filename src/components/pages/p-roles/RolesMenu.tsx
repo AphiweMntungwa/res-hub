@@ -46,7 +46,7 @@ export default function RolesMenu() {
       {options.map((option, index) => (
         <Grid item xs={12} sm={6} md={4} key={index}>
           <Link href={`roles${option.link}`} passHref>
-            <StyledCard component="a">
+            <StyledCard>
               <CardHeader
                 avatar={<IconButton>{option.icon}</IconButton>}
                 title={<Typography variant="h6">{option.title}</Typography>}

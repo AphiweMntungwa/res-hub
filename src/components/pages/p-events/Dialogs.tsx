@@ -1,22 +1,24 @@
-import React from 'react';
+import React from 'react'; 
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
 import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField'
+import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { TransitionProps } from '@mui/material/transitions';
 import { Dayjs } from 'dayjs';
 import axiosInstance from '@/lib/axiosInstance';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface Props {
     open: boolean;
     handleClose: () => void;
-    setRefreshTrigger: React.Dispatch<React.SetStateAction<boolean>>}
+    setRefreshTrigger: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
 interface Event {
     eventName: string;
@@ -24,7 +26,6 @@ interface Event {
     type: string;
     description: string;
 }
-
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -42,7 +43,7 @@ const typeOptions = [
     { label: 'Recreation', id: 1 },
     { label: 'Formal', id: 2 },
     { label: 'Religious', id: 3 }
-]
+];
 
 export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose, setRefreshTrigger }) => {
     const [name, setName] = React.useState('');
@@ -50,73 +51,74 @@ export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose, s
     const [eventTypeVal, setEventTypeValue] = React.useState<any | null>(typeOptions[0]);
     const [dateOfEventValue, setDateOfEventValue] = React.useState<Dayjs | null>(null);
 
-
     const handleSubmitAddEvent = async (event: Event) => {
         try {
-            const response = await axiosInstance.post('/Events', event);
+            await axiosInstance.post('/Events', event);
             handleClose();
-            setRefreshTrigger(true)
+            setRefreshTrigger(true);
         } catch (error) {
-            console.log(error)
-            return [];
+            console.log(error);
         }
-    }
+    };
 
     return (
         <React.Fragment>
             <Dialog
+                fullScreen
                 open={open}
                 TransitionComponent={Transition}
                 keepMounted
                 onClose={handleClose}
                 aria-describedby="alert-dialog-slide-description"
             >
-                <DialogTitle>{"Add A New Event"}</DialogTitle>
-
-                <Box
-                    component="form"
-                    sx={{
-                        '& > :not(style)': { m: 1, width: '25ch' },
-                    }}
-                    noValidate
-                    autoComplete="off"
-                >
-                    <React.Suspense fallback={<div>Loading...</div>}>
-                        <DatePicker dateOfEventValue={dateOfEventValue} setDateOfEventValue={setDateOfEventValue} />
-                    </React.Suspense>
-
-                    <Autocomplete
-                        disablePortal
-                        id="combo-box-demo"
-                        value={eventTypeVal}
-                        onChange={(event: any, newValue: string | null) => {
-                            setEventTypeValue(newValue);
+                <DialogTitle sx={{ m: 0, p: 2 }}>
+                    Add A New Event
+                    <IconButton
+                        aria-label="close"
+                        onClick={handleClose}
+                        sx={{
+                            position: 'absolute',
+                            right: 8,
+                            top: 8,
+                            color: (theme) => theme.palette.grey[500],
                         }}
-                        options={typeOptions}
-                        sx={{ width: 300 }}
-                        renderInput={(params) => <TextField
-                            {...params}
-                            id="outlined-uncontrolled"
-                            label="Type Of Event"
-                        />}
-                    />
-                    <TextField
-                        id="outlined-controlled"
-                        label="Name Of Event"
-                        value={name}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                            setName(event.target.value);
-                        }}
-                    />
-                    <TextField
-                        id="outlined-controlled"
-                        label="Description Of Event"
-                        value={desc}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                            setDesc(event.target.value);
-                        }}
-                    />
-                </Box>
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <Box
+                        component="form"
+                        sx={{ '& > :not(style)': { m: 1, width: '100%' } }}
+                        noValidate
+                        autoComplete="off"
+                    >
+                        <Autocomplete
+                            disablePortal
+                            id="combo-box-demo"
+                            value={eventTypeVal}
+                            onChange={(event: any, newValue: any) => {
+                                setEventTypeValue(newValue);
+                            }}
+                            options={typeOptions}
+                            sx={{ width: 300 }}
+                            renderInput={(params) => <TextField {...params} label="Type Of Event" />}
+                        />
+                        <TextField
+                            label="Name Of Event"
+                            value={name}
+                            onChange={(event) => setName(event.target.value)}
+                        />
+                        <TextField
+                            label="Description Of Event"
+                            value={desc}
+                            onChange={(event) => setDesc(event.target.value)}
+                        />
+                          <React.Suspense fallback={<div>Loading...</div>}>
+                            <DatePicker dateOfEventValue={dateOfEventValue} setDateOfEventValue={setDateOfEventValue} />
+                        </React.Suspense>
+                    </Box>
+                </DialogContent>
                 <DialogActions>
                     <Button onClick={() => {
                         const newEvent: Event = {
@@ -126,9 +128,9 @@ export const AlertDialogSlideAddEvent: React.FC<Props> = ({ open, handleClose, s
                             description: desc
                         };
                         handleSubmitAddEvent(newEvent);
-                    }
-                    }>
-                        Submit</Button>
+                    }}>
+                        Submit
+                    </Button>
                 </DialogActions>
             </Dialog>
         </React.Fragment>

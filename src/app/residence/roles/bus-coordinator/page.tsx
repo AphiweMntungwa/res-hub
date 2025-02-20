@@ -6,12 +6,12 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
 export const metadata: Metadata = {
-    title: 'Residence Admins',
-    description: "Admins of this residence",
+    title: 'Bus Co-ordinators',
+    description: "Bus co-ordinators of the residence",
 }
 
 
-interface Admin {
+interface BusAdmin {
     firstName: string;
     id: string;
     lastName: string;
@@ -22,7 +22,7 @@ interface Admin {
     email: string;
 }
 
-async function fetchAdmins(token: string | undefined): Promise<Admin[]> {
+async function fetchBusAdmins(token: string | undefined): Promise<BusAdmin[]> {
     try {
         const response = await axiosInstance.get('/roles/admins', {
             headers: {
@@ -36,14 +36,14 @@ async function fetchAdmins(token: string | undefined): Promise<Admin[]> {
     }
 }
 
-const Admins: React.FC<Admin> = async () => {
+const BusAdmins: React.FC<BusAdmin> = async () => {
     const cookieStore = cookies();
     const token = cookieStore.get('jwt-token')?.value;
     if (!token) {
         redirect('/auth/login');
     }
 
-    const admins = await fetchAdmins(token)
+    const admins = await fetchBusAdmins(token)
 
     return (
         <section className="flex min-h-screen flex-col items-center justify-between pt-20 px-10">
@@ -52,4 +52,4 @@ const Admins: React.FC<Admin> = async () => {
     );
 };
 
-export default Admins;
+export default BusAdmins;
