@@ -37,9 +37,9 @@ const StyledCardContent = styled(CardContent)({
 
 const options = [
     { title: "Admins", description: "Manage user roles, permissions, and oversee the system's security and operations.", icon: <DownloadIcon />, link: "/admin" },
-    { title: "Bus Coordinator", description: "Oversee transportation logistics, manage schedules, and ensure smooth transit operations.", icon: <BuildIcon />, link: "/bus-coordinator" },
-    { title: "Residence Event Organizers", description: "Plan and execute events within residences, ensuring engagement and participation.", icon: <ViewInArIcon />, link: "/residence-events" },
-    { title: "Sports Events", description: "Coordinate sporting events, schedule tournaments, and manage event logistics.", icon: <PaletteIcon />, link: "/sports-events" },
+    { title: "Bus Coordinators", description: "Oversee transportation logistics, manage schedules, and ensure smooth transit operations.", icon: <BuildIcon />, link: "/bus-coordinator" },
+    { title: "Residence Event Organizers", description: "Plan and execute events within residences, ensuring engagement and participation.", icon: <ViewInArIcon />, link: "/event-organizers" },
+    { title: "Sports Events", description: "Coordinate sporting events, schedule tournaments, and manage event logistics.", icon: <PaletteIcon />, link: "/sports" },
     { title: "Open Polls", description: "Create and manage polls, gather feedback, and analyze results to improve engagement.", icon: <DesignServicesIcon />, link: "/polls" },
 ];
 

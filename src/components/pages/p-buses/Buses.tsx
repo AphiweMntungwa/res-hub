@@ -1,24 +1,27 @@
 "use client"
 import React from 'react';
+import { motion } from 'framer-motion';
 import Alert from '@mui/material/Alert';
-import CheckIcon from '@mui/icons-material/Check';
 import Grid from '@mui/material/Grid';
-import { Card, CardContent, Typography, List, ListItem, Button, CardActions, IconButton, Divider } from '@mui/material';
+import { Card, CardContent, Typography, List, ListItem, Button, CardActions, IconButton, Divider, Box } from '@mui/material';
 import BusDialog from './AddBus';
 import EditBusDialog from './EditBusDialog';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import HomeIcon from '@mui/icons-material/Home';
 import axiosInstance from '@/lib/axiosInstance';
 import DeleteDialog from './DeleteBusDialog';
+import AddTaskOutlinedIcon from '@mui/icons-material/AddTaskOutlined';
 
 interface Bus {
     busId: number;
     busNumber: string;
-    lastUpdated: string; // Use string to match the serialized date format, or use Date if you parse it.
+    lastUpdated: string;
     residenceId: number;
     lastUpdatedByUserId: string;
-    busDriver?: string;  // Optional bus driver name
-    busDriverPhoneNumber?: string;  // Optional bus driver phone number
+    busDriver?: string;
+    busDriverPhoneNumber?: string;
     departureTimes: DepartureTime;
 }
 
@@ -36,10 +39,19 @@ interface DepartureTime {
     }];
 }
 
-
 interface BusesProps {
-    busData: Bus[]
-    // You can define any props if needed
+    busData: Bus[];
+}
+
+function getDirectionIcon(value: number) {
+    switch (value) {
+        case Direction.FromResidence:
+            return <DirectionsBusIcon sx={{ color: '#1976d2', mr: 1 }} />;
+        case Direction.ToResidence:
+            return <HomeIcon sx={{ color: '#d32f2f', mr: 1 }} />;
+        default:
+            throw new Error('Invalid direction value');
+    }
 }
 
 function getDirectionFromValue(value: number) {
@@ -64,14 +76,13 @@ const Buses: React.FC<BusesProps> = ({ busData }) => {
     React.useEffect(() => {
         if (refreshTrigger) {
             const getRefreshBuses = async () => {
-                const response = await axiosInstance.get('/bus')
-                setLocalBusData(response.data.$values)
-                setRefreshTrigger(false)
-            }
-            getRefreshBuses()
+                const response = await axiosInstance.get('/bus');
+                setLocalBusData(response.data.$values);
+                setRefreshTrigger(false);
+            };
+            getRefreshBuses();
         }
-
-    }, [refreshTrigger])
+    }, [refreshTrigger]);
 
     const handleOpenDeleteDialog = (busId: number) => {
         setSelectedBusId(busId);
@@ -84,7 +95,6 @@ const Buses: React.FC<BusesProps> = ({ busData }) => {
     };
 
     const handleDeleteBus = async (busId: number | null) => {
-        console.log(busId)
         try {
             await axiosInstance.delete(`/bus/${busId}`);
             setRefreshTrigger(true);
@@ -102,93 +112,81 @@ const Buses: React.FC<BusesProps> = ({ busData }) => {
         setDialogOpen(false);
     };
 
-    const handleClickEditOpen = () => {
+    const handleClickEditOpen = (busId: number) => {
+        setSelectedBusId(busId);
         setDialogEditOpen(true);
     };
 
     const handleCloseEdit = () => {
         setDialogEditOpen(false);
+        setSelectedBusId(null);
     };
-
 
     return (
         <React.Fragment>
             <Grid container spacing={2}>
-                <Grid item xs={12} sm={12} md={12}>
-                    <Alert severity="info">
+                <Grid item xs={12}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
                         <Typography component='header'>
                             Last Updated By:
                         </Typography>
-                    </Alert>
+                        <IconButton onClick={handleClickOpen} sx={{ borderLeft: '1px solid #ddd', ml: 2 }}>
+                            <AddTaskOutlinedIcon fontSize="large" />
+                        </IconButton>
+                    </Box>
                 </Grid>
-
                 {localBusData.map((bus) => (
                     <Grid key={bus.busId} item xs={12} sm={6} md={4}>
-                        <Card variant="outlined" sx={{ mb: 2 }}>
-                            <CardContent>
-                                <Typography variant="h5" component="div">
-                                    Bus Number: {bus.busNumber}
-                                </Typography>
-                                <Typography variant="body1" color="textSecondary">
-                                    Driver: {bus.busDriver}
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                    Driver Phone: {bus.busDriverPhoneNumber}
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                    Residence ID: {bus.residenceId}
-                                </Typography>
-
-                                <List>
-                                    <ListItem className='px-0'>
-                                        <Typography variant="h6" component="div" sx={{ mt: 2 }}>
-                                            Bus Schedule:
-                                        </Typography>
-                                    </ListItem>
-
-                                    {bus.departureTimes.$values.map((time: any) => {
-                                        const directionValue = getDirectionFromValue(time.direction);
-                                        return (
+                        <motion.div whileHover={{ scale: 1.02 }}>
+                            <Card variant="outlined" sx={{ mb: 2, borderRadius: '16px', overflow: 'hidden' }}>
+                                <CardContent>
+                                    <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
+                                        Bus Number: {bus.busNumber}
+                                    </Typography>
+                                    <Typography variant="body1" color="textSecondary">
+                                        Driver: {bus.busDriver}
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        Driver Phone: {bus.busDriverPhoneNumber}
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        Residence ID: {bus.residenceId}
+                                    </Typography>
+                                    <List>
+                                        {bus.departureTimes.$values.map((time: any) => (
                                             <ListItem className='px-0' key={time.departureTimeId}>
-                                                <Typography variant="body1" color="textSecondary">
-                                                    {directionValue}
-                                                </Typography>
-                                                <Divider sx={{ backgroundColor: 'blue' }} className='mx-3' orientation="vertical" variant="middle" flexItem />
+                                                {getDirectionIcon(time.direction)}
                                                 <Typography variant="body2" color="textSecondary">
-                                                    {time.time}
+                                                    {time.time} - {getDirectionFromValue(time.direction)}
                                                 </Typography>
                                             </ListItem>
-                                        );
-                                    })}
-                                </List>
-                            </CardContent>
-                            <CardActions>
-                                <IconButton onClick={() => handleClickEditOpen()} aria-label="add to favorites">
-                                    <EditOutlinedIcon color='primary' />
-                                </IconButton>
-                                <IconButton onClick={() => handleOpenDeleteDialog(bus.busId)} aria-label="share">
-                                    <DeleteOutlineOutlinedIcon color='warning' />
-                                </IconButton>
-                            </CardActions>
-                        </Card>
+                                        ))}
+                                    </List>
+                                </CardContent>
+                                <CardActions sx={{ display: 'flex', gap: 1 }}>
+                                    <motion.button
+                                        whileHover={{ width: '100%' }}
+                                        className='flex-1 p-2 rounded-md border border-blue-500 flex justify-center items-center transition-all'
+                                        onClick={() => handleClickEditOpen(bus.busId)} // Trigger edit dialog
+                                    >
+                                        <EditOutlinedIcon sx={{ color: '#1976d2' }} />
+                                    </motion.button>
+                                    <motion.button
+                                        whileHover={{ width: '100%' }}
+                                        className='flex-1 p-2 rounded-md border border-red-500 flex justify-center items-center transition-all'
+                                        onClick={() => handleOpenDeleteDialog(bus.busId)} // Trigger delete dialog
+                                    >
+                                        <DeleteOutlineOutlinedIcon sx={{ color: '#d32f2f' }} />
+                                    </motion.button>
+                                </CardActions>
+                            </Card>
+                        </motion.div>
                         <EditBusDialog busData={bus} setRefreshTrigger={setRefreshTrigger} open={dialogEditOpen} handleClose={handleCloseEdit} />
                     </Grid>
                 ))}
-                <DeleteDialog
-                    open={dialogDeleteOpen}
-                    busId={selectedBusId}
-                    onClose={handleCloseDeleteDialog}
-                    onDelete={handleDeleteBus}
-                />
-                <Grid item xs={12} sm={12} md={12}>
-                    <Button variant="outlined" color="primary" onClick={handleClickOpen}>
-                        Add New Bus
-                    </Button>
-                </Grid>
+                <DeleteDialog open={dialogDeleteOpen} busId={selectedBusId} onClose={handleCloseDeleteDialog} onDelete={handleDeleteBus} />
                 <BusDialog setRefreshTrigger={setRefreshTrigger} open={dialogOpen} handleClose={handleClose} />
             </Grid>
-
-
         </React.Fragment>
     );
 };

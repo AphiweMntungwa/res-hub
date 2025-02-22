@@ -1,13 +1,18 @@
 import React from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Box, IconButton, Grid, Typography } from '@mui/material';
-import dayjs, { Dayjs } from 'dayjs';
-import * as Yup from 'yup';
+import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Slide, Typography, TextField, Grid, Button } from '@mui/material';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import * as Yup from 'yup';
 import CustomTimePicker from './CustomTimePicker';
 import axiosInstance from '@/lib/axiosInstance';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import CloseIcon from '@mui/icons-material/Close';
+import dayjs, { Dayjs } from 'dayjs';
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
 
 interface Props {
     open: boolean;
@@ -19,14 +24,13 @@ interface Props {
 interface Bus {
     busId: number;
     busNumber: string;
-    lastUpdated: string; // Use string to match the serialized date format, or use Date if you parse it.
+    lastUpdated: string;
     residenceId: number;
     lastUpdatedByUserId: string;
-    busDriver?: string;  // Optional bus driver name
-    busDriverPhoneNumber?: string;  // Optional bus driver phone number
+    busDriver?: string;
+    busDriverPhoneNumber?: string;
     departureTimes: DepartureTime;
 }
-
 
 enum Direction {
     FromResidence = 1,
@@ -58,13 +62,9 @@ const validationSchema = Yup.object().shape({
     busDriverPhoneNumber: Yup.string()
 });
 
-const parseTime = (timeString: string): Dayjs => {
-    return dayjs(timeString, 'HH:mm'); // Parse as 24-hour format
-};
-
 const EditBusDialog: React.FC<Props> = ({ open, handleClose, setRefreshTrigger, busData }) => {
     const { control, handleSubmit, setValue, formState: { errors } } = useForm<FormValues>({
-        defaultValues: busData, // Use busData as default values
+        defaultValues: busData,
         resolver: yupResolver(validationSchema)
     });
 
@@ -81,21 +81,17 @@ const EditBusDialog: React.FC<Props> = ({ open, handleClose, setRefreshTrigger, 
     React.useEffect(() => {
         const fromTimes = busData.departureTimes.$values
             .filter(departure => departure.direction === Direction.FromResidence)
-            .map(departure => dayjs(departure.time)); // Convert ISO string to Day.js object
+            .map(departure => dayjs(departure.time));
 
         const toTimes = busData.departureTimes.$values
             .filter(departure => departure.direction === Direction.ToResidence)
-            .map(departure => dayjs(departure.time)); // Convert ISO string to Day.js object
+            .map(departure => dayjs(departure.time));
 
-        // Set the values into the form
         setValue('fromTimes', fromTimes);
         setValue('toTimes', toTimes);
     }, [busData, setValue]);
 
-
     const onSubmit = async (data: FormValues) => {
-        console.log(data)
-
         const updatedBus = {
             busNumber: data.busNumber,
             fromTimes: data.fromTimes.map(time => time?.toISOString() || ''),
@@ -105,7 +101,7 @@ const EditBusDialog: React.FC<Props> = ({ open, handleClose, setRefreshTrigger, 
         };
 
         try {
-            await axiosInstance.put(`/bus/${busData.busId}`, updatedBus); // Update the bus
+            await axiosInstance.put(`/bus/${busData.busId}`, updatedBus);
             handleClose();
             setRefreshTrigger(true);
         } catch (error) {
@@ -114,18 +110,15 @@ const EditBusDialog: React.FC<Props> = ({ open, handleClose, setRefreshTrigger, 
     };
 
     return (
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-            <DialogTitle>Edit Bus Schedule</DialogTitle>
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="lg" fullScreen TransitionComponent={Transition}>
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                Edit Bus Schedule
+                <IconButton edge="end" color="inherit" onClick={handleClose}>
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
             <DialogContent>
-                <Box
-                    component="form"
-                    sx={{
-                        '& > :not(style)': { m: 1, width: '100%' },
-                    }}
-                    noValidate
-                    autoComplete="off"
-                    onSubmit={handleSubmit(onSubmit)}
-                >
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <Controller
                         name="busNumber"
                         control={control}
@@ -230,7 +223,7 @@ const EditBusDialog: React.FC<Props> = ({ open, handleClose, setRefreshTrigger, 
                             />
                         )}
                     />
-                </Box>
+                </form>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose}>Cancel</Button>
