@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import React from 'react';
-import Important from '@/components/pages/p-general/Important';
+import Posts from '@/components/pages/p-general/Posts';
 
 export const metadata: Metadata = {
   title: 'General',
@@ -14,8 +14,8 @@ interface GeneralProps {
 
 const General: React.FC<GeneralProps> = (props) => {
   return (
-    <section className="flex min-h-screen flex-col items-center justify-between pt-20 px-16">
-      <Important/>
+    <section className="post-searchbar flex min-h-screen flex-col items-center justify-between pt-20 px-16">
+      <Posts/>
     </section>
   );
 };

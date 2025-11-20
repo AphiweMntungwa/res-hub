@@ -1,23 +1,20 @@
 import * as React from 'react';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListSubheader from '@mui/material/ListSubheader';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
-import IconButton from '@mui/material/IconButton';
-import Avatar from '@mui/material/Avatar';
+import {
+    Button,
+    TextField,
+    List,
+    ListItem,
+    ListItemText,
+    IconButton,
+    Avatar,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    Slide
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import PersonIcon from '@mui/icons-material/Person';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Link from 'next/link';
 import { axiosExpressInstance } from '@/lib/axiosInstance';
 
 interface FormDialogProps {
@@ -34,6 +31,9 @@ interface ChatUser {
     StudentNumber: string;
 }
 
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
 
 export default function FormDialog({ open, onClose }: FormDialogProps) {
     const [residenceUsers, setResidenceUsers] = React.useState<ChatUser[]>([]);
@@ -43,39 +43,53 @@ export default function FormDialog({ open, onClose }: FormDialogProps) {
             try {
                 const response = await axiosExpressInstance.get('/residence-users');
                 setResidenceUsers(response.data);
-                console.log(response.data)
             } catch (error) {
                 console.error('Error fetching users:', error);
             }
         };
 
-        fetchUsers();
-
-    }, [])
+        if (open) {
+            fetchUsers();
+        }
+    }, [open]);
 
     return (
         <Dialog
+            fullScreen
             open={open}
             onClose={onClose}
+            TransitionComponent={Transition}
         >
-            <DialogTitle>Start a New Chat</DialogTitle>
+            <DialogTitle>
+                Start a New Chat
+                <IconButton
+                    edge="end"
+                    color="inherit"
+                    onClick={onClose}
+                    aria-label="close"
+                    sx={{ position: 'absolute', right: 16, top: 16 }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
             <DialogContent>
                 <DialogContentText>
                     These are all the users in your residence, start a new chat.
                 </DialogContentText>
                 <List>
-                    {residenceUsers.map(user => {
-                        return (
-                            <ListItem key={user.Id}>
-                                <IconButton>
-                                    <Avatar>
-                                        <PersonIcon />
-                                    </Avatar>
-                                </IconButton>
-                                <ListItemText onClick={() => window.location.href = `/residence/inbox/${user.Id}`} primary={user.FirstName + " " + user.LastName} secondary="Jan 9, 2014" />
-                            </ListItem>
-                        )
-                    })}
+                    {residenceUsers.map(user => (
+                        <ListItem key={user.Id} onClick={() => window.location.href = `/residence/inbox/${user.Id}`}>
+                            <IconButton>
+                                <Avatar>
+                                    <PersonIcon />
+                                </Avatar>
+                            </IconButton>
+                            <ListItemText
+                                primary={`${user.FirstName} ${user.LastName}`}
+                                secondary="Jan 9, 2014"
+                            />
+                        </ListItem>
+                    ))}
                 </List>
             </DialogContent>
         </Dialog>

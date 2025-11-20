@@ -25,3 +25,30 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+.post-searchbar{
+  padding-top: 56px;
+}
+.posts-searchbox{
+  margin-bottom: 10px;
+}
+@media (max-width: 600px) {
+  .post-card-cover{
+    width: 100%;
+  }
+  .post-cover-div{
+    width: 100%;
+  }
+  .post-searchbar {
+    padding-inline: 10px;
+    padding-top: 46px; /* Reduced on small screens */
+  }
+}
+
+@media (max-width: 600px) {
+  .posts-searchbox {
+    top: 56px; /* Reduced on small screens */
+  }
+}
+
+/*  */

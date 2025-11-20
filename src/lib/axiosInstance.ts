@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance with SSL configuration
 const axiosInstance = axios.create({
-    baseURL: 'https://localhost:7217/api',
+    baseURL: 'http://192.168.0.173:5000/api',
     httpsAgent: new (require('https').Agent)({
         rejectUnauthorized: false
     }),

@@ -170,7 +170,7 @@ export default function TemporaryDrawer() {
     >
 
       <List>
-        {['General', 'Inbox', 'Buses', 'Events', 'Sports'].map((text, index) => (
+        {['Posts', 'Inbox', 'Buses', 'Events', 'Sports'].map((text, index) => (
           <Link key={text} href={`/residence/${text.toLowerCase()}`}>
             <ListItem disablePadding>
               <ListItemButton>
@@ -185,7 +185,7 @@ export default function TemporaryDrawer() {
       </List>
       <Divider />
       <List>
-        {['Businesses', 'Roles', 'Settings'].map((text, index) => (
+        {['Maintainance', 'Roles', 'Settings'].map((text, index) => (
           <Link key={text} href={`/residence/${text.toLowerCase()}`}>
             <ListItem key={text} disablePadding>
               <ListItemButton>
