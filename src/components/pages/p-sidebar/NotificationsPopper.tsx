@@ -1,24 +1,25 @@
 
 import * as React from 'react';
-import { axiosExpressInstance } from '@/lib/axiosInstance';
-import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import { IconButton, Popper } from '@mui/material';
-import { Card, CardContent, Typography, CardActions, Button } from '@mui/material';
+import { Card, CardContent, Typography, CardActions, Button, List, ListItem, ListItemText, Divider } from '@mui/material';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
+
+interface MessageNotification {
+    name: string;
+    count: number;
+    message: string;
+}
 
 interface PopperComponentProps {
     open: boolean;
     anchorEl: HTMLElement | null;
     handleClickAway: (event: MouseEvent | TouchEvent) => void;
+    notifications: MessageNotification[];
 }
 
-const NotificationsPopper: React.FC<PopperComponentProps> = ({ open, anchorEl, handleClickAway }) => {
+const NotificationsPopper: React.FC<PopperComponentProps> = ({ open, anchorEl, handleClickAway, notifications }) => {
     const arrowRef = React.useRef(null);
 
-    React.useEffect(()=>{
-        console.log(open)
-    }, [open])
-    
     return (
         <ClickAwayListener onClickAway={handleClickAway}>
             <Popper
@@ -56,21 +57,44 @@ const NotificationsPopper: React.FC<PopperComponentProps> = ({ open, anchorEl, h
                     },
                 ]}
             >
-                <Card sx={{ minWidth: 275 }}>
+                <Card sx={{ minWidth: 300, maxWidth: 400 }}>
                     <CardContent>
-                        <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
-                            Word of the Day
+                        <Typography variant="h6" component="div" sx={{ mb: 1 }}>
+                            Notifications
                         </Typography>
-                        <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>adjective</Typography>
-                        <Typography variant="body2">
-                            well meaning and kindly.
-                            <br />
-                            {'"a benevolent smile"'}
-                        </Typography>
+                        <Divider />
+                        {notifications && notifications.length > 0 ? (
+                            <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                                {notifications.map((notif, index) => (
+                                    <React.Fragment key={index}>
+                                        <ListItem alignItems="flex-start">
+                                            <ListItemText
+                                                primary={notif.name}
+                                                secondary={
+                                                    <React.Fragment>
+                                                        <Typography
+                                                            sx={{ display: 'inline' }}
+                                                            component="span"
+                                                            variant="body2"
+                                                            color="text.primary"
+                                                        >
+                                                            {notif.message}
+                                                        </Typography>
+                                                        {notif.count > 1 && ` (${notif.count})`}
+                                                    </React.Fragment>
+                                                }
+                                            />
+                                        </ListItem>
+                                        {index < notifications.length - 1 && <Divider variant="inset" component="li" />}
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                        ) : (
+                            <Typography sx={{ mt: 2, textAlign: 'center', color: 'text.secondary' }}>
+                                No new notifications
+                            </Typography>
+                        )}
                     </CardContent>
-                    <CardActions>
-                        <Button size="small">Learn More</Button>
-                    </CardActions>
                 </Card>
                 <span
                     ref={arrowRef}
@@ -79,11 +103,11 @@ const NotificationsPopper: React.FC<PopperComponentProps> = ({ open, anchorEl, h
                         height: 0,
                         borderLeft: '8px solid transparent',
                         borderRight: '8px solid transparent',
-                        borderBottom: '8px solid white', // Change the color to white
+                        borderBottom: '8px solid white',
                         position: 'absolute',
-                        top: '-7px', // Adjust the position for a smoother appearance
+                        top: '-7px',
                         left: 'calc(50% - 8px)',
-                        borderRadius: '2px', // Add a slight border-radius for smoother edges
+                        borderRadius: '2px',
                     }}
                 />
             </Popper>

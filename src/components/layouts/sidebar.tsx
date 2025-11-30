@@ -21,6 +21,7 @@ import { Avatar } from '@mui/material';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import NotificationsActiveOutlinedIcon from '@mui/icons-material/NotificationsActiveOutlined';
 import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
+import Skeleton from '@mui/material/Skeleton';
 
 import Link from 'next/link';
 import axiosInstance from "@/lib/axiosInstance";
@@ -215,16 +216,21 @@ export default function TemporaryDrawer() {
               component="div"
               sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
             >
-              <span> {userInfo?.residenceName}</span>
+              <span> {userInfo ? userInfo.residenceName : <Skeleton width={150} />}</span>
             </Typography>
 
             <Typography component="span" sx={{ paddingTop: 1, display: { xs: 'block', sm: 'none' } }} gutterBottom>
-              {userInfo?.fullName}
+              {userInfo ? userInfo.fullName : <Skeleton width={100} />}
             </Typography>
 
             <div className='flex items-center py-2' style={{ marginLeft: 'auto' }}>
-              <IconButton>
-                <NotificationsActiveOutlinedIcon sx={{ color: 'white' }} />
+              <IconButton
+                ref={anchorRef}
+                onClick={() => setOpenNotifyPopper((prev) => !prev)}
+              >
+                <Badge badgeContent={notifications.length} color="error">
+                  <NotificationsActiveOutlinedIcon sx={{ color: 'white' }} />
+                </Badge>
               </IconButton>
               <IconButton>
                 <MailOutlinedIcon sx={{ color: 'white' }} />
@@ -235,10 +241,15 @@ export default function TemporaryDrawer() {
                 </IconButton>
               </ProfilePopper>
               <Typography component="span" sx={{ paddingTop: 1.3, display: { xs: 'none', md: 'block' } }} gutterBottom>
-                {userInfo?.fullName}
+                {userInfo ? userInfo.fullName : <Skeleton width={100} sx={{ bgcolor: 'grey.400' }} />}
               </Typography>
             </div>
-            <NotificationsPopper open={openNotifyPopper} handleClickAway={handleClickAway} anchorEl={anchorRef.current} />
+            <NotificationsPopper
+              open={openNotifyPopper}
+              handleClickAway={handleClickAway}
+              anchorEl={anchorRef.current}
+              notifications={notifications}
+            />
 
           </Toolbar>
         </AppBar>
