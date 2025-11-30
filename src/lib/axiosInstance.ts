@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 });
 
 export const axiosExpressInstance = axios.create({
-    baseURL: "http://localhost:3001/api",
+    baseURL: "http://192.168.0.173:3001/api",
     httpsAgent: new (require('https').Agent)({
         rejectUnauthorized: false
     }),
