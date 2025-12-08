@@ -3,7 +3,7 @@ import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { TextField, Autocomplete, Button, Typography, Stepper, StepLabel, Step, Box, Alert } from '@mui/material';
+import { TextField, Autocomplete, Button, Typography, Stepper, StepLabel, Step, Box, Paper } from '@mui/material';
 import Input from '@mui/joy/Input';
 import axiosInstance from '@/lib/axiosInstance';
 // import Cookies from 'js-cookie';
@@ -113,58 +113,76 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
     }
 
     return (
-        <React.Fragment>
-            <Typography variant="h6" component="h6">
-                Create Reshub Account
+        <Paper
+            elevation={6}
+            sx={{
+                p: 4,
+                width: '100%',
+                maxWidth: '600px',
+                borderRadius: 4,
+                backdropFilter: 'blur(10px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            }}
+        >
+            <Typography variant="h4" component="h1" align="center" sx={{ mb: 4, fontWeight: 700, color: '#333' }}>
+                Create Account
             </Typography>
-            <Stepper activeStep={activeStep}>
-                {steps.map((label, index) => {
-                    const stepProps: { completed?: boolean } = {};
-                    const labelProps: {
-                        optional?: React.ReactNode;
-                    } = {};
 
-                    return (
-                        <Step key={label} {...stepProps}>
-                            <StepLabel {...labelProps}>{label}</StepLabel>
-                        </Step>
-                    );
-                })}
+            <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+                {steps.map((label) => (
+                    <Step key={label}>
+                        <StepLabel>{label}</StepLabel>
+                    </Step>
+                ))}
             </Stepper>
 
-            {isOpen ? <Alert variant="outlined" severity="success">
-                <p>You Have Successfully registered for a Reshub account</p>
-            </Alert> : activeStep === 0 ? (<Box className="pt-5">
-                <Autocomplete
-                    id="grouped-demo"
-                    options={options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter))}
-                    groupBy={(option) => option.firstLetter}
-                    getOptionLabel={(option) => option.name}
-                    sx={{ width: 300 }}
-                    value={res}
-                    onChange={(event, newValue) => {
-                        setRes(newValue);
-                    }}
-                    isOptionEqualToValue={(option, value) => option.name === value.name}
-                    renderInput={(params) => <TextField {...params} label="Residences With categories" />}
-                />
-                <Input
-                    className='mt-5'
-                    sx={{ height: 20 }}
-                    type="number"
-                    value={roomNumber}
-                    onChange={(event) => setRoomNumber(event.target.value)}
-                    slotProps={{
-                        input: {
-                            min: 1,
-                            max: 4000,
-                            step: 1,
-                        },
-                    }}
-                />
-            </Box>) :
-                (<form style={{ minWidth: "50%" }} onSubmit={handleSubmit(onSubmit)}>
-                    <div>
+            {isOpen ? (
+                <Box sx={{ textAlign: 'center', py: 3 }}>
+                    <Typography variant="h6" color="success.main" gutterBottom>
+                        Registration Successful!
+                    </Typography>
+                    <Typography variant="body1">
+                        You have successfully registered for a Reshub account.
+                    </Typography>
+                </Box>
+            ) : activeStep === 0 ? (
+                <Box sx={{ pt: 2 }}>
+                    <Autocomplete
+                        id="grouped-demo"
+                        options={options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter))}
+                        groupBy={(option) => option.firstLetter}
+                        getOptionLabel={(option) => option.name}
+                        fullWidth
+                        value={res}
+                        onChange={(event, newValue) => {
+                            setRes(newValue);
+                        }}
+                        isOptionEqualToValue={(option, value) => option.name === value.name}
+                        renderInput={(params) => <TextField {...params} label="Select Residence" variant="outlined" />}
+                        sx={{ mb: 3 }}
+                    />
+                    <Typography gutterBottom>Room Number</Typography>
+                    <Input
+                        sx={{
+                            height: 40,
+                            borderRadius: '8px',
+                            border: '1px solid #ccc'
+                        }}
+                        type="number"
+                        value={roomNumber}
+                        onChange={(event) => setRoomNumber(event.target.value)}
+                        slotProps={{
+                            input: {
+                                min: 1,
+                                max: 4000,
+                                step: 1,
+                            },
+                        }}
+                    />
+                </Box>
+            ) : (
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                         <TextField
                             fullWidth
                             label="Student Number"
@@ -172,9 +190,8 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                             {...register("studentNumber")}
                             error={!!errors.studentNumber}
                             helperText={errors.studentNumber?.message}
+                            sx={{ gridColumn: '1 / -1' }}
                         />
-                    </div>
-                    <div>
                         <TextField
                             fullWidth
                             label="First Name"
@@ -183,8 +200,6 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                             error={!!errors.firstName}
                             helperText={errors.firstName?.message}
                         />
-                    </div>
-                    <div>
                         <TextField
                             fullWidth
                             label="Last Name"
@@ -193,8 +208,6 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                             error={!!errors.lastName}
                             helperText={errors.lastName?.message}
                         />
-                    </div>
-                    <div>
                         <TextField
                             fullWidth
                             label="School Email"
@@ -203,9 +216,8 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                             {...register("email")}
                             error={!!errors.email}
                             helperText={errors.email?.message}
+                            sx={{ gridColumn: '1 / -1' }}
                         />
-                    </div>
-                    <div>
                         <TextField
                             fullWidth
                             label="Password"
@@ -215,8 +227,6 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                             error={!!errors.password}
                             helperText={errors.password?.message}
                         />
-                    </div>
-                    <div>
                         <TextField
                             fullWidth
                             label="Confirm Password"
@@ -226,27 +236,57 @@ const Register: React.FC<ResidenceProps> = ({ residences }) => {
                             error={!!errors.confirmPassword}
                             helperText={errors.confirmPassword?.message}
                         />
-                    </div>
-                    <Button type="submit" variant="outlined" color="primary">
+                    </Box>
+
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        size="large"
+                        sx={{
+                            mt: 3,
+                            py: 1.5,
+                            borderRadius: 2,
+                            fontSize: '1.1rem',
+                            textTransform: 'none',
+                            background: 'linear-gradient(45deg, #FF6B6B 30%, #4ECDC4 90%)',
+                            boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+                            transition: 'transform 0.2s',
+                            '&:hover': {
+                                background: 'linear-gradient(45deg, #FF8E8E 30%, #6EE7DE 90%)',
+                                transform: 'scale(1.02)',
+                            },
+                        }}
+                    >
                         Register
                     </Button>
-                </form>)}
-            <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                </form>
+            )}
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
                 <Button
-                    color="inherit"
-                    disabled={activeStep === 0}
+                    disabled={activeStep === 0 || isOpen}
                     onClick={handleBack}
-                    sx={{ mr: 1 }}
+                    sx={{ color: '#666' }}
                 >
                     Back
                 </Button>
 
-                <Button onClick={handleNext} disabled={activeStep === steps.length - 1}>
-                    Next
-                </Button>
+                {!isOpen && activeStep < steps.length - 1 && (
+                    <Button
+                        variant="contained"
+                        onClick={handleNext}
+                        sx={{
+                            background: 'linear-gradient(45deg, #4ECDC4 30%, #556270 90%)',
+                            color: 'white',
+                        }}
+                    >
+                        Next
+                    </Button>
+                )}
             </Box>
             <AlertSignUp isOpen={isOpen} resId={res} />
-        </React.Fragment >
+        </Paper>
     );
 };
 

@@ -7,10 +7,10 @@ import axiosInstance from '@/lib/axiosInstance';
 export const metadata: Metadata = {
     title: 'Register',
     description: "Create a new Reshub account and join residence group",
-  }
+}
 
 
-  interface Residence {
+interface Residence {
     resId: number,
     name: string,
     address: string,
@@ -30,12 +30,16 @@ async function fetchResidences(): Promise<Residence[]> {
     }
 }
 
-  
+
 const RegisterStudent = async () => {
     const residences = await fetchResidences();
 
     return (
-        <section className="flex min-h-screen flex-col items-center justify-start pt-5 px-16">
+        <section className="flex min-h-screen flex-col items-center justify-center px-4 py-8"
+            style={{
+                background: 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)',
+            }}
+        >
             <Register residences={residences} />
         </section >
     );

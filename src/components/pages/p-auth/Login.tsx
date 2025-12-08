@@ -3,17 +3,14 @@ import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { TextField, Checkbox, Button, Typography, FormControlLabel, Alert, Link } from '@mui/material';
-import Input from '@mui/joy/Input';
+import { TextField, Button, Typography, Alert, Link, Paper, Box } from '@mui/material';
 import axiosInstance from '@/lib/axiosInstance';
 import { useRouter } from 'next/navigation';
-import NextLink from 'next/link'; // Import NextLink
-// import Cookies from 'js-cookie';
+import NextLink from 'next/link';
 
 type Inputs = {
     email: string;
     password: string;
-    rememberMe: boolean;
 };
 
 const validationSchema = Yup.object().shape({
@@ -21,7 +18,6 @@ const validationSchema = Yup.object().shape({
         .required('Email is required'),
     password: Yup.string()
         .required('Password is required'),
-    rememberMe: Yup.boolean().required()
 });
 
 
@@ -52,55 +48,107 @@ const Login = () => {
     }, [isOpen])
 
     return (
-        <React.Fragment>
-            <Typography variant="h6" component="h6">
-                Sign In Reshub
+        <Paper
+            elevation={6}
+            sx={{
+                p: 4,
+                width: '100%',
+                maxWidth: '450px',
+                borderRadius: 4,
+                backdropFilter: 'blur(10px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            }}
+        >
+            <Typography variant="h4" component="h1" align="center" sx={{ mb: 1, fontWeight: 700, color: '#333' }}>
+                Welcome Back
             </Typography>
-            <form style={{ minWidth: "50%" }} onSubmit={handleSubmit(onSubmit)}>
-                <div>
+            <Typography variant="body1" align="center" sx={{ mb: 4, color: '#666' }}>
+                Sign in to Residence Hub
+            </Typography>
+
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <Box sx={{ mb: 2 }}>
                     <TextField
                         fullWidth
                         label="School Email"
                         type="email"
-                        margin="normal"
+                        variant="outlined"
                         {...register("email")}
                         error={!!errors.email}
                         helperText={errors.email?.message}
+                        sx={{
+                            '& .MuiOutlinedInput-root': { borderRadius: 2 }
+                        }}
                     />
-                </div>
-                <div>
+                </Box>
+                <Box sx={{ mb: 3 }}>
                     <TextField
                         fullWidth
                         label="Password"
                         type="password"
-                        margin="normal"
+                        variant="outlined"
                         {...register("password")}
                         error={!!errors.password}
                         helperText={errors.password?.message}
+                        sx={{
+                            '& .MuiOutlinedInput-root': { borderRadius: 2 }
+                        }}
                     />
-                </div>
-                <div>
-                    <FormControlLabel control={<Checkbox
-                        {...register("rememberMe")}
-                        inputProps={{ 'aria-label': 'controlled' }}
-                    />} label="Remember Me?" />
+                </Box>
 
-                </div>
-                <Button type="submit" variant="outlined" color="primary">
+                <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    size="large"
+                    sx={{
+                        py: 1.5,
+                        borderRadius: 2,
+                        fontSize: '1.1rem',
+                        textTransform: 'none',
+                        background: 'linear-gradient(45deg, #FF6B6B 30%, #4ECDC4 90%)',
+                        boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+                        transition: 'transform 0.2s',
+                        '&:hover': {
+                            background: 'linear-gradient(45deg, #FF8E8E 30%, #6EE7DE 90%)',
+                            transform: 'scale(1.02)',
+                        },
+                    }}
+                >
                     Sign In
                 </Button>
             </form>
-            {isOpen ? <Alert variant="outlined" severity="success">
-                <p>You are Logged In, redirecting...</p>
-            </Alert> : null}
-            {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
-            <Typography variant="body2" component="p" style={{ marginTop: '10px' }}>
-                Don&apos;t have an account?
-                <Link component={NextLink} href="/auth/register">
-                    Create one
-                </Link>
-            </Typography>
-        </React.Fragment >
+
+            {isOpen && (
+                <Alert variant="filled" severity="success" sx={{ mt: 3, borderRadius: 2 }}>
+                    Login successful! Redirecting...
+                </Alert>
+            )}
+
+            {errorMessage && (
+                <Alert variant="filled" severity="error" sx={{ mt: 3, borderRadius: 2 }}>
+                    {errorMessage}
+                </Alert>
+            )}
+
+            <Box sx={{ mt: 4, textAlign: 'center' }}>
+                <Typography variant="body2" color="textSecondary">
+                    Don&apos;t have an account?{' '}
+                    <Link
+                        component={NextLink}
+                        href="/auth/register"
+                        sx={{
+                            fontWeight: 600,
+                            color: '#4ECDC4',
+                            textDecoration: 'none',
+                            '&:hover': { textDecoration: 'underline' }
+                        }}
+                    >
+                        Create one
+                    </Link>
+                </Typography>
+            </Box>
+        </Paper>
     );
 };
 
